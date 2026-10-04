@@ -743,7 +743,7 @@ document.getElementById('purchaseForm').addEventListener('submit', async (e)=>{
 function showConfirmation(p){
   const box = document.getElementById('confirmBox');
   const rangeTxt = p.desde === p.hasta ? ('BA-'+pad(p.desde)) : ('BA-'+pad(p.desde)+' al BA-'+pad(p.hasta));
-  const motivo = `Bingo Andino 2026 - $${p.monto.toLocaleString('es-CL')} - ${p.nombreComprador} - ${p.nombreAlumno}`;
+ const motivo = `${p.nombreComprador} - ${p.curso} - ${p.id}`;
   const msg = encodeURIComponent(
     `Hola! Soy ${p.nombreComprador}, apoderado/a de ${p.nombreAlumno} (${p.curso}). ` +
     `Acabo de transferir $${p.monto.toLocaleString('es-CL')} por ${p.cantidad} cartones de BINGO ANDINO 2026 ` +
