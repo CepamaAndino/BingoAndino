@@ -1179,8 +1179,8 @@ async function registrarVentaPresencial(){
 function imprimirVoucherCompleto(r){
   let html = `
     <h2 style="margin:0;">BINGO ANDINO 2026</h2>
-    <p style="margin:4px 0;font-size:13px;">Colegio Andino Montessori</p>
-    <p style="margin:4px 0;font-size:13px;">Voucher de compra</p>
+    <p style="margin:4px 0;font-size:13px;">CEPAMA-Colegio Andino Montessori</p>
+    <p style="margin:4px 0;font-size:13px;">Detalle de compra</p>
     <hr>
     <p style="font-size:13px;margin:6px 0;">Comprador: <b>${r.comprador}</b></p>
   `;
@@ -1212,7 +1212,7 @@ function imprimirVoucherCompleto(r){
   html += `
     <p style="font-size:11px;margin-top:8px;">Fecha: ${new Date(r.fecha).toLocaleString('es-CL')}</p>
     <hr>
-    <p style="font-size:11px;">Conserva este voucher como comprobante${r.cartones ? ' y para retirar tus cartones físicos' : ''}.</p>
+    <p style="font-size:11px;">Conserva este detalle como comprobante${r.cartones ? ' para retirar tus cartones físicos ' : ''}.</p>
   `;
   document.getElementById('voucherContent').innerHTML = html;
   window.print();
