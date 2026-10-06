@@ -350,6 +350,41 @@
     background:#fff; border:1px solid #e6d9bd; border-radius:12px; padding:12px 16px;
     margin-bottom:16px; flex-wrap:wrap;
   }
+
+/* Compra guiada: estilos limitados a la vista de familias */
+#view-comprar .btn, #confirmBox .btn {font-family:'Manrope',sans-serif;text-transform:none;letter-spacing:0;font-weight:800;font-size:15px;min-height:48px;}
+#confirmBox{text-align:left;scroll-margin-top:20px;}
+#confirmBox h2{color:var(--turquesa);font-family:'Manrope',sans-serif;font-size:24px;margin:16px 0 8px;}
+#confirmBox h3{color:var(--turquesa);font-size:17px;margin:24px 0 12px;}
+.checkout-steps{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:#645b4b;}
+.checkout-steps strong{color:var(--turquesa);}
+.reservation-header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;border-radius:12px;background:#eff6ed;padding:14px;margin-top:18px;}
+.reservation-header strong{font-size:18px;overflow-wrap:anywhere;}
+.checkout-summary{background:var(--crema);border-radius:12px;padding:18px;margin-top:14px;}
+.checkout-summary>div{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;}
+.checkout-summary strong{font-size:30px;color:var(--turquesa);}
+.checkout-summary p{font-size:14px;margin:10px 0 0;overflow-wrap:anywhere;}
+#confirmBox .transfer-list .row{gap:16px;padding:10px 0;line-height:1.5;}
+#confirmBox .transfer-list .row b{text-align:right;font-family:'Manrope',sans-serif;overflow-wrap:anywhere;min-width:0;}
+.checkout-motivo{background:#f3f5f9;border-radius:10px;padding:14px;margin:16px 0;}
+.checkout-motivo span,.checkout-motivo strong{display:block;overflow-wrap:anywhere;}
+.checkout-motivo span{font-size:12px;margin-bottom:8px;}
+.checkout-copy{width:100%;margin-top:10px;}
+.payment-check{display:flex;gap:10px;align-items:center;text-transform:none;letter-spacing:0;font-size:14px;cursor:pointer;}
+.payment-check input{width:22px;height:22px;flex-shrink:0;}
+.checkout-send{text-decoration:none;}
+.checkout-send[aria-disabled="true"]{opacity:.5;cursor:not-allowed;}
+@media(max-width:480px){#confirmBox{padding:16px;}#confirmBox .transfer-list .row{flex-direction:column;gap:3px;}#confirmBox .transfer-list .row b{text-align:left;}.checkout-steps{font-size:11px;}}
+
+.caja-header{display:flex;gap:24px;align-items:center;justify-content:space-between;margin:24px 0 18px;}.caja-header>div:last-child{width:40%;}.caja-header h2{font-size:32px;margin:0;color:var(--turquesa);}.caja-header p{margin:4px 0;}
+.caja-layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr);gap:18px;align-items:start;margin-bottom:20px;}
+.caja-summary{position:sticky;top:16px;}.caja-summary h2{font-family:'Manrope',sans-serif;color:var(--turquesa);margin-bottom:16px;}
+.caja-tabs{display:flex;gap:8px;margin-bottom:18px;}.caja-tabs button{flex:1;min-height:48px;border:0;border-radius:10px;background:#f0f2f6;color:var(--turquesa);font:700 14px 'Manrope',sans-serif;cursor:pointer;}.caja-tabs button.active{background:var(--turquesa);color:#fff;}
+.caja-catalogo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}.caja-catalogo>div{display:contents;}.caja-catalogo>div[hidden]{display:none;}
+.caja-products .qty-row{border:1px solid #e6d9bd;border-radius:12px;padding:16px;display:flex;flex-direction:column;align-items:stretch;gap:16px;}.caja-products .pname{font-size:15px;color:var(--turquesa);}.caja-products .pprice{font-size:15px;margin-top:8px;}.caja-products .qty-controls{justify-content:space-between;}.caja-products .qty-btn{width:44px;height:44px;background:#f0f2f6;border:0;font-size:24px;color:var(--turquesa);}.caja-products .qty-val{font-size:20px;}.caja-products .qty-row.selected{border-color:var(--ok);background:#f6faf5;}
+.caja-summary .btn{font-family:'Manrope',sans-serif;text-transform:none;letter-spacing:0;font-weight:700;font-size:14px;min-height:44px;}.caja-summary .btn-primary{background:var(--ok);color:white;}.caja-clear{width:100%;margin-top:10px;}.caja-summary .price-box b{font-size:28px!important;}.caja-summary #vueltoBox{background:#edf6ed;border:0;color:var(--ok);}.caja-detail-row{display:flex;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid #eee; font-size:13px;}.caja-detail-row span{overflow-wrap:anywhere;}.caja-detail-row b{white-space:nowrap;}
+@media(min-width:1200px){main:has(#view-admin.active){max-width:1280px;}.caja-catalogo{grid-template-columns:repeat(3,minmax(0,1fr));}}
+@media(max-width:760px){.caja-header{flex-direction:column;align-items:stretch;}.caja-header>div:last-child{width:100%;}.caja-layout{grid-template-columns:1fr;}.caja-summary{position:static;}.caja-tabs button{font-size:12px;}}
 </style>
 </head>
 <body>
@@ -447,23 +482,8 @@
           </div>
         </div>
 
-        <!-- 3. Datos para transferir -->
-        <div class="card" style="margin-top:16px;">
-          <h2>Datos para transferir</h2>
-          <p class="sub">Transfiere el monto exacto y guarda tu comprobante.</p>
-          <div class="transfer-list" id="transferList">
-            <div class="row"><span>Nombre</span><b>PATRICIA BRAVO ALCAINO</b></div>
-            <div class="row"><span>RUT</span><b>16.859.492-5</b></div>
-            <div class="row"><span>Banco</span><b>Banco Estado</b></div>
-            <div class="row"><span>Cuenta</span><b>Cuenta Corriente</b></div>
-            <div class="row"><span>N° Cuenta</span><b>33000074697</b></div>
-            <div class="row"><span>Email</span><b>cepama@colegioandino.cl</b></div>
-          </div>
-          <button type="button" class="btn btn-ghost" style="width:100%;margin-top:14px;" onclick="copyTransferData()">📋 Copiar datos de transferencia</button>
-        </div>
-
-        <!-- 4. Notificar compra -->
-        <button type="submit" class="btn btn-primary" id="submitBtn">📢 Notificar compra</button>
+        <p class="note">Primero crea tu reserva. Después podrás copiar los datos de transferencia con tu código.</p>
+        <button type="submit" class="btn btn-primary" id="submitBtn">Siguiente · Crear reserva</button>
         <div class="err" id="formErr"></div>
       </form>
     </div>
@@ -500,18 +520,17 @@
         <button class="btn btn-secondary btn-sm" id="modoToggleBtn" onclick="toggleModo()">Cambiar modo</button>
       </div>
 
-      <div class="card" style="margin-bottom:16px;">
-        <h2 style="font-size:16px;">⚡ Venta presencial rápida</h2>
-        <p class="sub">Para cuando alguien paga ahí mismo. Queda aprobada al toque.</p>
-        <label>Nombre (opcional)</label>
-        <input type="text" id="ventaNombre" placeholder="Ej: Juan Pérez">
-
-        <p style="font-weight:800; font-size:13px; text-transform:uppercase; color:var(--turquesa-dark); margin:16px 0 2px;">🎟️ Cartones</p>
-        <div id="ventaCartonesList"></div>
-
-        <p style="font-weight:800; font-size:13px; text-transform:uppercase; color:var(--turquesa-dark); margin:16px 0 2px;">🥤 Bebestibles</p>
-        <div id="ventaBebestiblesList"></div>
-
+      <div class="caja-header"><div><h2>Bingo Andino</h2><p>Caja · Venta presencial</p></div><div><label for="ventaNombre">Nombre del comprador (opcional)</label><input type="text" id="ventaNombre" placeholder="Ej: Juan Pérez"></div></div>
+      <div class="caja-layout">
+        <div class="card caja-products">
+          <div class="caja-tabs" role="group" aria-label="Categorías">
+            <button type="button" onclick="filtrarCaja('cartones')" data-category="cartones">Cartones</button>
+            <button type="button" onclick="filtrarCaja('bebestibles')" data-category="bebestibles">Bebestibles</button>
+            <button type="button" onclick="filtrarCaja('todos')" data-category="todos" class="active">Todos</button>
+          </div>
+          <div class="caja-catalogo"><div id="ventaCartonesList"></div><div id="ventaBebestiblesList"></div></div>
+        </div>
+        <div class="card caja-summary"><h2>Resumen de venta</h2><div id="cajaDetalle"><p class="note">Selecciona productos para comenzar.</p></div>
         <div class="price-box" style="margin-top:14px; text-align:center; font-size:16px;">
           Total: <b id="ventaTotalCombo" style="font-size:20px;">$0</b>
         </div>
@@ -522,6 +541,7 @@
           <button type="button" class="btn btn-ghost pay-toggle" data-metodo="transferencia" onclick="setMetodoPago('transferencia')">🏦 Transferencia</button>
         </div>
 
+        <div id="cashAmountWrap"><label for="cashAmount">Monto recibido</label><input type="number" min="0" step="1" id="cashAmount" placeholder="Ingresa el monto" oninput="setMontoRecibido(this.value==='' ? null : Number(this.value))"></div>
         <div id="efectivoQuickRow" style="display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:10px;">
           <button type="button" class="btn btn-ghost btn-sm" onclick="setMontoRecibido('exacto')">Exacto</button>
           <button type="button" class="btn btn-ghost btn-sm" onclick="setMontoRecibido(5000)">$5.000</button>
@@ -534,9 +554,10 @@
         </div>
 
         <button class="btn btn-primary" id="registrarVentaBtn" disabled onclick="registrarVentaPresencial()">Selecciona cartones o bebestibles</button>
-        <div class="err" id="ventaErr"></div>
+        <button type="button" class="btn btn-ghost caja-clear" onclick="limpiarVenta()">Limpiar venta</button>
+        <div class="err" id="ventaErr" role="alert"></div>
+        </div>
       </div>
-
       <div class="card" style="margin-bottom:16px;">
         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
           <h2 style="font-size:16px; margin:0;">🧾 Ventas registradas en caja</h2>
@@ -724,11 +745,14 @@ document.getElementById('purchaseForm').addEventListener('submit', async (e)=>{
     errBox.textContent = 'El WhatsApp debe tener 9 dígitos.';
     return;
   }
+  if(!Number.isInteger(Number(payload.sets)) || Number(payload.sets)<1){ errBox.textContent='Ingresa una cantidad entera de sets, mayor que cero.'; return; }
+  if(submitBtn.disabled || lastPurchase) return;
   submitBtn.disabled = true;
-  submitBtn.textContent = 'Enviando...';
+  submitBtn.textContent = 'Creando reserva...';
   try{
-    const r = await callBackend('submitPurchase', payload);
+    const r = await callBackend('createReservation', payload);
     lastPurchase = Object.assign({}, payload, r);
+    saveActiveReservation(lastPurchase);
     showConfirmation(lastPurchase);
     document.getElementById('formCardWrap').style.display='none';
     loadModoYDisponibilidad();
@@ -736,38 +760,102 @@ document.getElementById('purchaseForm').addEventListener('submit', async (e)=>{
     errBox.textContent = err.message;
   }finally{
     submitBtn.disabled = false;
-    submitBtn.textContent = '📢 Notificar compra';
+    submitBtn.textContent = 'Siguiente · Crear reserva';
   }
 });
 
-function showConfirmation(p){
-  const box = document.getElementById('confirmBox');
-  const rangeTxt = p.desde === p.hasta ? ('BA-'+pad(p.desde)) : ('BA-'+pad(p.desde)+' al BA-'+pad(p.hasta));
- const motivo = `${p.nombreComprador} - ${p.curso} - ${p.id}`;
-  const msg = encodeURIComponent(
-    `Hola! Soy ${p.nombreComprador}, apoderado/a de ${p.nombreAlumno} (${p.curso}). ` +
-    `Acabo de transferir $${p.monto.toLocaleString('es-CL')} por ${p.cantidad} cartones de BINGO ANDINO 2026 ` +
-    `(reserva ${p.id}). Quedo atento/a a la confirmación 🙏`
-  );
-  box.style.display='block';
-  box.innerHTML = `
-    <h2>¡Reserva creada! N° ${p.id}</h2>
-    <div class="range">${rangeTxt}</div>
-    <p>Monto a transferir: <b>$${p.monto.toLocaleString('es-CL')}</b></p>
-    <p><span class="badge pendiente">Pendiente de validación</span></p>
-    <div class="price-box" style="text-align:left;">
-      <b>Pon esto en "Motivo" o "Mensaje" de tu transferencia:</b><br>
-      <span id="motivoText" style="font-family:'JetBrains Mono',monospace;">${motivo}</span>
-      <button type="button" class="btn btn-ghost btn-sm" style="width:100%;margin-top:10px;" onclick="copyMotivo()">📋 Copiar motivo</button>
-    </div>
-    <p class="note">Ya avisamos tu compra al Cepama por correo. Si quieres, también puedes avisarles directo por WhatsApp:</p>
-    <a class="btn btn-wsp" href="https://wa.me/56${ADMIN_WHATSAPP.replace(/^56/,'')}?text=${msg}" target="_blank" rel="noopener">💬 Avisar también por WhatsApp</a>
-    <p class="note">Cuando el Cepama valide tu transferencia, te llegará un correo de confirmación. Tus cartones se entregan de forma física — guarda tu número de reserva para retirarlos.</p>
-  `;
+function saveActiveReservation(p){
+  try { sessionStorage.setItem('bingo-active-reservation',JSON.stringify(p)); } catch(err) {}
 }
-function copyMotivo(){
-  const text = document.getElementById('motivoText').textContent;
-  navigator.clipboard.writeText(text).then(showToast);
+function restoreActiveReservation(){
+  try {
+    const p=JSON.parse(sessionStorage.getItem('bingo-active-reservation') || 'null');
+    if(!p || !p.id || !p.reservationToken) return;
+    lastPurchase=p;
+    document.getElementById('formCardWrap').style.display='none';
+    showConfirmation(p);
+  } catch(err) {}
+}
+function reservationMotivo(p){ return `${p.nombreComprador} - ${p.curso} - ${p.id}`; }
+function bankDataText(){
+  return 'PATRICIA BRAVO ALCAINO\nRUT: 16.859.492-5\nBanco Estado\nCuenta Corriente\nN° Cuenta: 33000074697\nEmail: cepama@colegioandino.cl';
+}
+async function copyCheckoutText(text){
+  try{
+    if(navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(text); }
+    else {
+      const area=document.createElement('textarea'); area.value=text;
+      area.style.position='fixed'; area.style.opacity='0'; document.body.appendChild(area);
+      area.select(); let copied; try { copied=document.execCommand('copy'); } finally { area.remove(); }
+      if(!copied) throw new Error('Selecciona y copia los datos manualmente.');
+    }
+    showToast();
+  }catch(err){ document.getElementById('checkoutErr').textContent='No se pudo copiar. Puedes seleccionar los datos y copiarlos manualmente.'; }
+}
+function copyAllPayment(){
+  if(!lastPurchase) return;
+  copyCheckoutText(bankDataText()+`\nMonto: $${Number(lastPurchase.monto).toLocaleString('es-CL')}\nCódigo de reserva: ${lastPurchase.id}\nMotivo / Mensaje: ${reservationMotivo(lastPurchase)}`);
+}
+function copyMotivo(){ if(lastPurchase) copyCheckoutText(reservationMotivo(lastPurchase)); }
+function showConfirmation(p){
+  const box=document.getElementById('confirmBox');
+  const h=escapeHtml;
+  const rangeTxt=p.desde===p.hasta ? 'BA-'+pad(p.desde) : 'BA-'+pad(p.desde)+' al BA-'+pad(p.hasta);
+  const amount=Number(p.monto).toLocaleString('es-CL');
+  const message=`Hola, soy ${p.nombreComprador}, apoderado/a de ${p.nombreAlumno} (${p.curso}). Informo mi compra de BINGO ANDINO 2026. Reserva: ${p.id}. Total: $${amount}. Cantidad: ${p.cantidad} cartones. Motivo de transferencia: ${reservationMotivo(p)}. Adjunto el comprobante para su revisión.`;
+  box.style.display='block';
+  box.innerHTML=`
+    <div class="checkout-steps"><span>1. Compra y datos ✓</span><strong>2. Pago y aviso</strong></div>
+    <h2>Notificar compra y realiza tu pago</h2>
+    <p class="sub">Tu reserva está creada. Transfiere y luego avisa tu compra.</p>
+    <div class="reservation-header"><span>¡Reserva creada!</span><strong>Código: ${h(p.id)}</strong><span class="badge pendiente">Pendiente de validación</span></div>
+    <div class="checkout-summary"><div><span>Total a transferir</span><strong>$${amount}</strong></div><p>${h(p.nombreComprador)} · ${h(p.curso)}</p><p>${h(p.cantidad)} cartones · ${h(rangeTxt)}</p></div>
+    <h3>1. Realiza tu pago</h3>
+    <div class="transfer-list">
+      <div class="row"><span>Titular</span><b>PATRICIA BRAVO ALCAINO</b></div>
+      <div class="row"><span>RUT</span><b>16.859.492-5</b></div>
+      <div class="row"><span>Banco</span><b>Banco Estado</b></div>
+      <div class="row"><span>Tipo de cuenta</span><b>Cuenta Corriente</b></div>
+      <div class="row"><span>N° Cuenta</span><b>33000074697</b></div>
+      <div class="row"><span>Email</span><b>cepama@colegioandino.cl</b></div>
+    </div>
+    <div class="checkout-motivo"><span>Motivo o mensaje de transferencia</span><strong id="motivoText">${h(reservationMotivo(p))}</strong></div>
+    <button type="button" class="btn btn-secondary checkout-copy" onclick="copyAllPayment()">Copiar todo para transferir</button>
+    <div class="err" id="checkoutErr" role="alert"></div>
+    <h3>2. Notifica tu compra</h3>
+    <p class="note">Después de pagar, abre WhatsApp y envía el mensaje con tu comprobante. Se usará el mismo código de reserva.</p>
+    <label class="payment-check"><input type="checkbox" id="paymentDone"> Ya realicé la transferencia</label>
+    <button type="button" class="btn btn-primary" id="notifyPurchaseBtn" disabled>Enviar compra</button>
+    <p class="note" id="sendHelp" role="status">Tu pago queda pendiente de revisión por CEPAMA. Guarda tu código para retirar los cartones físicos.</p>
+    <a class="btn btn-ghost checkout-copy" href="https://wa.me/${ADMIN_WHATSAPP}?text=${encodeURIComponent(message)}" target="_blank" rel="noopener">Enviar comprobante por WhatsApp (opcional)</a>
+  `;
+  const notifyBtn=document.getElementById('notifyPurchaseBtn');
+  let notificationBusy=false;
+  let notificationSent=!!p.notificada;
+  document.getElementById('paymentDone').addEventListener('change',e=>{
+    notifyBtn.disabled=notificationBusy || notificationSent || !e.target.checked;
+  });
+  notifyBtn.addEventListener('click',async()=>{
+    if(notificationBusy || notificationSent || !document.getElementById('paymentDone').checked) return;
+    notificationBusy=true; notifyBtn.disabled=true; notifyBtn.textContent='Enviando compra…';
+    document.getElementById('checkoutErr').textContent='';
+    try {
+      const result=await callBackend('notifyPurchase',{id:p.id,reservationToken:p.reservationToken});
+      if(!result.notificada) throw new Error('No se pudo confirmar el aviso. Intenta nuevamente.');
+      notificationSent=true; p.notificada=true;
+      notifyBtn.textContent='Compra enviada ✓';
+      document.getElementById('sendHelp').textContent='Compra enviada a CEPAMA. Tu pago está pendiente de revisión. Código: '+p.id;
+      saveActiveReservation(p);
+    } catch(err) {
+      document.getElementById('checkoutErr').textContent=err.message;
+      notifyBtn.textContent='Reintentar · Enviar compra';
+    } finally {
+      notificationBusy=false;
+      notifyBtn.disabled=notificationSent || !document.getElementById('paymentDone').checked;
+    }
+  });
+  if(notificationSent){notifyBtn.textContent='Compra enviada ✓';document.getElementById('sendHelp').textContent='Compra enviada a CEPAMA. Tu pago está pendiente de revisión. Código: '+p.id;}
+  box.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function pad(n){ return String(n).padStart(4,'0'); }
 
@@ -1032,12 +1120,14 @@ function setMetodoPago(m){
   metodoPago = m;
   document.querySelectorAll('.pay-toggle').forEach(b=> b.classList.toggle('active', b.dataset.metodo===m));
   document.getElementById('efectivoQuickRow').style.display = m==='efectivo' ? 'grid' : 'none';
-  if(m !== 'efectivo'){ montoRecibido = null; }
+  document.getElementById('cashAmountWrap').hidden = m!=='efectivo';
+  if(m !== 'efectivo'){ montoRecibido = null; document.getElementById('cashAmount').value=''; }
   calcularTotalVenta();
 }
 function setMontoRecibido(val){
   const { total } = calcularTotalVenta();
   montoRecibido = (val === 'exacto') ? total : val;
+  document.getElementById('cashAmount').value=montoRecibido===null ? '' : montoRecibido;
   calcularTotalVenta();
 }
 function actualizarVuelto(total){
@@ -1064,8 +1154,9 @@ function calcularTotalVenta(){
 
   const btn = document.getElementById('registrarVentaBtn');
   const haySeleccion = (unidadesSueltas + setsCount) > 0 || totalBeb > 0;
-  btn.disabled = !haySeleccion;
-  btn.textContent = haySeleccion ? '🖨️ Registrar venta e imprimir voucher' : 'Selecciona cartones o bebestibles';
+  btn.disabled = cajaBusy || !haySeleccion || (metodoPago==='efectivo' && montoRecibido!==null && montoRecibido<total);
+  btn.textContent = cajaBusy ? 'Registrando…' : haySeleccion ? 'Registrar venta · $'+total.toLocaleString('es-CL') : 'Selecciona productos';
+  renderCajaDetalle();
 
   actualizarVuelto(total);
   return { montoCartonesTotal, totalBeb, total };
@@ -1142,8 +1233,13 @@ async function agregarProducto(){
 
 /* ============ VENTA PRESENCIAL COMBINADA + VOUCHER ============ */
 async function registrarVentaPresencial(){
+  if(cajaBusy) return;
   const errBox = document.getElementById('ventaErr');
   errBox.textContent='';
+  const venta=calcularTotalVenta();
+  if(venta.total<=0) return;
+  if(metodoPago==='efectivo' && montoRecibido!==null && montoRecibido<venta.total){errBox.textContent='El monto recibido es menor al total.';return;}
+  cajaBusy=true; calcularTotalVenta();
   const nombre = document.getElementById('ventaNombre').value.trim();
   const precioUnit = precioUnitarioCarton();
   const montoUnidades = unidadesSueltas * precioUnit;
@@ -1169,11 +1265,12 @@ async function registrarVentaPresencial(){
     productosCache.forEach(p=> ventaBebestiblesQty[p.id]=0);
     renderCartonesVenta();
     renderBebestiblesVenta();
+    document.getElementById('cashAmount').value='';
     setMetodoPago('efectivo');
     await loadPurchases();
   }catch(err){
     errBox.textContent = err.message;
-  }
+  } finally { cajaBusy=false; calcularTotalVenta(); }
 }
 
 function imprimirVoucherCompleto(r){
@@ -1307,6 +1404,30 @@ function exportExcel(){
   XLSX.writeFile(wb, 'BINGO_ANDINO_2026_REPORTE.xlsx');
 }
 
+
+let cajaBusy=false;
+function filtrarCaja(category){
+  document.getElementById('ventaCartonesList').hidden=category==='bebestibles';
+  document.getElementById('ventaBebestiblesList').hidden=category==='cartones';
+  document.querySelectorAll('.caja-tabs button').forEach(b=>{b.classList.toggle('active',b.dataset.category===category);b.setAttribute('aria-pressed',String(b.dataset.category===category));});
+}
+function renderCajaDetalle(){
+  const items=[];
+  if(unidadesSueltas) items.push({label:unidadesSueltas+' × Cartón individual',monto:unidadesSueltas*precioUnitarioCarton()});
+  if(setsCount) items.push({label:setsCount+' × Set de 6 cartones',monto:calcularPrecioLocal(currentModo,setsCount).monto});
+  productosCache.forEach(p=>{const q=ventaBebestiblesQty[p.id]||0;if(q)items.push({label:q+' × '+p.nombre,monto:q*Number(p.precio)});});
+  document.getElementById('cajaDetalle').innerHTML=items.length ? items.map(i=>`<div class="caja-detail-row"><span>${escapeHtml(i.label)}</span><b>$${i.monto.toLocaleString('es-CL')}</b></div>`).join('') : '<p class="note">Selecciona productos para comenzar.</p>';
+  document.querySelectorAll('.caja-products .qty-row').forEach(row=>{row.classList.toggle('selected',Number(row.querySelector('.qty-val')?.textContent)>0);});
+}
+function limpiarVenta(){
+  if(cajaBusy) return;
+  unidadesSueltas=0;setsCount=0;montoRecibido=null;
+  productosCache.forEach(p=>ventaBebestiblesQty[p.id]=0);
+  document.getElementById('ventaNombre').value='';document.getElementById('cashAmount').value='';document.getElementById('ventaErr').textContent='';
+  renderCartonesVenta();renderBebestiblesVenta();setMetodoPago('efectivo');
+}
+
+restoreActiveReservation();
 </script>
 </body>
 </html>
