@@ -645,7 +645,16 @@ async function callBackend(action, payload){
     headers:{'Content-Type':'text/plain;charset=utf-8'},
     body: JSON.stringify({action, payload})
   });
-  const json = await res.json();
+  const responseText = await res.text();
+  if (!res.ok) {
+    throw new Error('El servidor de Apps Script respondió con HTTP ' + res.status + '. Revisa la URL /exec y la implementación.');
+  }
+  let json;
+  try {
+    json = JSON.parse(responseText);
+  } catch (err) {
+    throw new Error('Apps Script devolvió una página en vez de datos. Revisa BACKEND_URL, publica una nueva versión y verifica el acceso de la aplicación web.');
+  }
   if(!json.ok) throw new Error(json.error || 'Error desconocido');
   return json.data;
 }
@@ -821,7 +830,7 @@ async function loadModoAdmin(){
     currentModo = m.modo;
     renderModoBadge(m.modo);
     renderCartonesVenta();
-  }catch(err){ /* silencioso */ }
+  }catch(err){ document.getElementById('ventaBebestiblesList').textContent = 'No se pudo cargar el catálogo: ' + err.message; }
 }
 function renderModoBadge(modo){
   const badge = document.getElementById('modoBadge');
@@ -957,7 +966,7 @@ async function loadProductosAdmin(){
     productosCache.forEach(p=>{ if(!(p.id in ventaBebestiblesQty)) ventaBebestiblesQty[p.id] = 0; });
     renderBebestiblesVenta();
     renderGestionBebestibles();
-  }catch(err){ /* silencioso */ }
+  }catch(err){ document.getElementById('ventaBebestiblesList').textContent = 'No se pudo cargar el catálogo: ' + err.message; }
 }
 
 function renderBebestiblesVenta(){
