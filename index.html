@@ -977,13 +977,44 @@ function renderTable(){
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 
 async function saveEstado(id){
-  const nuevoEstado = document.getElementById('sel-'+id).value;
+  const select = document.getElementById('sel-'+id);
+  const nuevoEstado = select.value;
+  if(select.dataset.saving === 'true') return;
+  select.dataset.saving = 'true';
+  select.disabled = true;
   try{
-    const r = await callBackend('updateStatus', {id, estado: nuevoEstado, password: adminPassword});
+    let result;
+    try{
+      result = await callBackend('updateStatus', {id, estado: nuevoEstado, password: adminPassword});
+    }catch(saveError){
+      // La operación puede haberse guardado aunque falle la respuesta HTTP.
+      // Consultar el estado; nunca repetir una escritura automáticamente.
+      let comprobacion;
+      try{
+        comprobacion = await callBackend('listPurchases', {password: adminPassword});
+      }catch(readError){
+        throw new Error('No se pudo confirmar el estado de ' + id + '. El cambio puede haberse guardado. Revisa Transacciones antes de volver a guardar. Detalle: ' + saveError.message);
+      }
+      if(!Array.isArray(comprobacion.rows)){
+        throw new Error('No se pudo confirmar el cambio. Revisa el estado de ' + id + ' en Transacciones.');
+      }
+      const compra = comprobacion.rows.find(p => p.id === id);
+      if(!compra || compra.estado !== nuevoEstado) throw saveError;
+      purchasesCache = comprobacion.rows;
+      updateStats(comprobacion);
+      renderTable();
+      document.getElementById('statTotalGeneral').textContent = 'Sin actualizar';
+      document.getElementById('statBebestibles').textContent = 'Sin actualizar';
+      alert('Estado confirmado en la planilla: ' + id + ' → ' + nuevoEstado + '. La respuesta inicial del servidor falló.');
+      return;
+    }
     await loadPurchases();
-    if(r.emailWarning) alert(r.emailWarning);
+    if(result.emailWarning) alert(result.emailWarning);
   }catch(err){
-    alert('Error: '+err.message);
+    alert(err.message);
+  }finally{
+    select.disabled = false;
+    delete select.dataset.saving;
   }
 }
 
