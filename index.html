@@ -636,18 +636,27 @@ document.querySelectorAll('nav.tabs button').forEach(btn=>{
 });
 
 /* ============ LLAMADAS AL BACKEND ============ */
-async function callBackend(action, payload){
+let backendQueue = Promise.resolve();
+function callBackend(action, payload){
+  const request = backendQueue.then(() => requestBackend(action, payload));
+  backendQueue = request.catch(() => {});
+  return request;
+}
+async function requestBackend(action, payload){
   if(!BACKEND_URL || BACKEND_URL.indexOf('PEGA_AQUI') !== -1){
     throw new Error('Falta configurar BACKEND_URL en el código con la URL de tu Apps Script.');
   }
   const res = await fetch(BACKEND_URL, {
     method:'POST',
+    credentials:'omit',
+    cache:'no-store',
+    redirect:'follow',
     headers:{'Content-Type':'text/plain;charset=utf-8'},
     body: JSON.stringify({action, payload})
   });
   const responseText = await res.text();
   if (!res.ok) {
-    throw new Error('El servidor de Apps Script respondió con HTTP ' + res.status + '. Revisa la URL /exec y la implementación.');
+    throw new Error('La consulta ' + action + ' respondió con HTTP ' + res.status + '.');
   }
   let json;
   try {
