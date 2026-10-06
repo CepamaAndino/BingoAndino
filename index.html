@@ -656,6 +656,9 @@ async function callBackend(action, payload){
     throw new Error('Apps Script devolvió una página en vez de datos. Revisa BACKEND_URL, publica una nueva versión y verifica el acceso de la aplicación web.');
   }
   if(!json.ok) throw new Error(json.error || 'Error desconocido');
+  if (json.data === undefined || json.data === null) {
+    throw new Error('La consulta ' + action + ' no devolvió datos. Revisa esa función en Apps Script y la versión publicada.');
+  }
   return json.data;
 }
 
@@ -856,21 +859,41 @@ async function toggleModo(){
 let bebestiblesVentasCache = [];
 
 async function loadPurchases(){
-  document.getElementById('loadingMsg').style.display='block';
-  try{
-    const [r, rb] = await Promise.all([
-      callBackend('listPurchases', {password: adminPassword}),
-      callBackend('listBebestiblesVentas', {password: adminPassword})
-    ]);
+  const loading = document.getElementById('loadingMsg');
+  loading.style.display = 'block';
+  loading.textContent = 'Cargando...';
+  const results = await Promise.allSettled([
+    callBackend('listPurchases', {password: adminPassword}),
+    callBackend('listBebestiblesVentas', {password: adminPassword})
+  ]);
+  const errores = [];
+  const compras = results[0];
+  const bebidas = results[1];
+  let r = null;
+  if(compras.status === 'fulfilled' && Array.isArray(compras.value.rows)){
+    r = compras.value;
     purchasesCache = r.rows;
-    bebestiblesVentasCache = rb.rows;
-    updateStats(r);
     renderTable();
+  }else{
+    errores.push('Cartones: ' + (compras.status === 'rejected' ? compras.reason.message : 'listPurchases no devolvió una lista rows válida.'));
+  }
+  if(bebidas.status === 'fulfilled' && Array.isArray(bebidas.value.rows)){
+    bebestiblesVentasCache = bebidas.value.rows;
     renderVentasCaja();
-  }catch(err){
-    alert('Error cargando datos: '+err.message);
-  }finally{
-    document.getElementById('loadingMsg').style.display='none';
+  }else{
+    errores.push('Bebestibles: ' + (bebidas.status === 'rejected' ? bebidas.reason.message : 'listBebestiblesVentas no devolvió una lista rows válida.'));
+    const caja = document.getElementById('ventasCajaList');
+    if(caja) caja.textContent = 'No se pudieron actualizar las ventas de bebestibles.';
+  }
+  if(r) updateStats(r);
+  if(bebidas.status !== 'fulfilled' || !Array.isArray(bebidas.value.rows)){
+    document.getElementById('statBebestibles').textContent = 'Sin actualizar';
+    document.getElementById('statTotalGeneral').textContent = 'Sin actualizar';
+  }
+  if(errores.length){
+    loading.textContent = errores.join(' | ');
+  }else{
+    loading.style.display = 'none';
   }
 }
 
@@ -962,6 +985,7 @@ let ventaBebestiblesQty = {};
 async function loadProductosAdmin(){
   try{
     const r = await callBackend('listProductos', {password: adminPassword});
+    if(!Array.isArray(r.rows)) throw new Error('listProductos no devolvió una lista rows válida.');
     productosCache = r.rows;
     productosCache.forEach(p=>{ if(!(p.id in ventaBebestiblesQty)) ventaBebestiblesQty[p.id] = 0; });
     renderBebestiblesVenta();
