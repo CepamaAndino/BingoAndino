@@ -617,7 +617,7 @@
 <script>
 /* ============ CONFIGURACIÓN ============ */
 // ⚠️ Reemplaza esto con la URL de tu implementación de Apps Script (termina en /exec)
-const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbzFoPqHhgFExHlqSszoWJPhBzLRa2l_qglidD_T4D2OWLIXxeHQZHYx1v7lgX-MJXzV/exec';
+const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbyqNbWZoZhmzhup5yp41-u8WyuvdlB9Ce7e80Kc99VUN-cDA_jZ62zh-hrH74d8vK7-/exec';
 // Número de WhatsApp del colegio/admin que recibirá la notificación de compra (formato 56969159984)
 const ADMIN_WHATSAPP = '56969159984';
 
@@ -636,38 +636,17 @@ document.querySelectorAll('nav.tabs button').forEach(btn=>{
 });
 
 /* ============ LLAMADAS AL BACKEND ============ */
-let backendQueue = Promise.resolve();
-function callBackend(action, payload){
-  const request = backendQueue.then(() => requestBackend(action, payload));
-  backendQueue = request.catch(() => {});
-  return request;
-}
-async function requestBackend(action, payload){
+async function callBackend(action, payload){
   if(!BACKEND_URL || BACKEND_URL.indexOf('PEGA_AQUI') !== -1){
     throw new Error('Falta configurar BACKEND_URL en el código con la URL de tu Apps Script.');
   }
   const res = await fetch(BACKEND_URL, {
     method:'POST',
-    credentials:'omit',
-    cache:'no-store',
-    redirect:'follow',
     headers:{'Content-Type':'text/plain;charset=utf-8'},
     body: JSON.stringify({action, payload})
   });
-  const responseText = await res.text();
-  if (!res.ok) {
-    throw new Error('La consulta ' + action + ' respondió con HTTP ' + res.status + '.');
-  }
-  let json;
-  try {
-    json = JSON.parse(responseText);
-  } catch (err) {
-    throw new Error('Apps Script devolvió una página en vez de datos. Revisa BACKEND_URL, publica una nueva versión y verifica el acceso de la aplicación web.');
-  }
+  const json = await res.json();
   if(!json.ok) throw new Error(json.error || 'Error desconocido');
-  if (json.data === undefined || json.data === null) {
-    throw new Error('La consulta ' + action + ' no devolvió datos. Revisa esa función en Apps Script y la versión publicada.');
-  }
   return json.data;
 }
 
@@ -842,7 +821,7 @@ async function loadModoAdmin(){
     currentModo = m.modo;
     renderModoBadge(m.modo);
     renderCartonesVenta();
-  }catch(err){ document.getElementById('ventaBebestiblesList').textContent = 'No se pudo cargar el catálogo: ' + err.message; }
+  }catch(err){ /* silencioso */ }
 }
 function renderModoBadge(modo){
   const badge = document.getElementById('modoBadge');
@@ -868,41 +847,21 @@ async function toggleModo(){
 let bebestiblesVentasCache = [];
 
 async function loadPurchases(){
-  const loading = document.getElementById('loadingMsg');
-  loading.style.display = 'block';
-  loading.textContent = 'Cargando...';
-  const results = await Promise.allSettled([
-    callBackend('listPurchases', {password: adminPassword}),
-    callBackend('listBebestiblesVentas', {password: adminPassword})
-  ]);
-  const errores = [];
-  const compras = results[0];
-  const bebidas = results[1];
-  let r = null;
-  if(compras.status === 'fulfilled' && Array.isArray(compras.value.rows)){
-    r = compras.value;
+  document.getElementById('loadingMsg').style.display='block';
+  try{
+    const [r, rb] = await Promise.all([
+      callBackend('listPurchases', {password: adminPassword}),
+      callBackend('listBebestiblesVentas', {password: adminPassword})
+    ]);
     purchasesCache = r.rows;
+    bebestiblesVentasCache = rb.rows;
+    updateStats(r);
     renderTable();
-  }else{
-    errores.push('Cartones: ' + (compras.status === 'rejected' ? compras.reason.message : 'listPurchases no devolvió una lista rows válida.'));
-  }
-  if(bebidas.status === 'fulfilled' && Array.isArray(bebidas.value.rows)){
-    bebestiblesVentasCache = bebidas.value.rows;
     renderVentasCaja();
-  }else{
-    errores.push('Bebestibles: ' + (bebidas.status === 'rejected' ? bebidas.reason.message : 'listBebestiblesVentas no devolvió una lista rows válida.'));
-    const caja = document.getElementById('ventasCajaList');
-    if(caja) caja.textContent = 'No se pudieron actualizar las ventas de bebestibles.';
-  }
-  if(r) updateStats(r);
-  if(bebidas.status !== 'fulfilled' || !Array.isArray(bebidas.value.rows)){
-    document.getElementById('statBebestibles').textContent = 'Sin actualizar';
-    document.getElementById('statTotalGeneral').textContent = 'Sin actualizar';
-  }
-  if(errores.length){
-    loading.textContent = errores.join(' | ');
-  }else{
-    loading.style.display = 'none';
+  }catch(err){
+    alert('Error cargando datos: '+err.message);
+  }finally{
+    document.getElementById('loadingMsg').style.display='none';
   }
 }
 
@@ -977,44 +936,13 @@ function renderTable(){
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 
 async function saveEstado(id){
-  const select = document.getElementById('sel-'+id);
-  const nuevoEstado = select.value;
-  if(select.dataset.saving === 'true') return;
-  select.dataset.saving = 'true';
-  select.disabled = true;
+  const nuevoEstado = document.getElementById('sel-'+id).value;
   try{
-    let result;
-    try{
-      result = await callBackend('updateStatus', {id, estado: nuevoEstado, password: adminPassword});
-    }catch(saveError){
-      // La operación puede haberse guardado aunque falle la respuesta HTTP.
-      // Consultar el estado; nunca repetir una escritura automáticamente.
-      let comprobacion;
-      try{
-        comprobacion = await callBackend('listPurchases', {password: adminPassword});
-      }catch(readError){
-        throw new Error('No se pudo confirmar el estado de ' + id + '. El cambio puede haberse guardado. Revisa Transacciones antes de volver a guardar. Detalle: ' + saveError.message);
-      }
-      if(!Array.isArray(comprobacion.rows)){
-        throw new Error('No se pudo confirmar el cambio. Revisa el estado de ' + id + ' en Transacciones.');
-      }
-      const compra = comprobacion.rows.find(p => p.id === id);
-      if(!compra || compra.estado !== nuevoEstado) throw saveError;
-      purchasesCache = comprobacion.rows;
-      updateStats(comprobacion);
-      renderTable();
-      document.getElementById('statTotalGeneral').textContent = 'Sin actualizar';
-      document.getElementById('statBebestibles').textContent = 'Sin actualizar';
-      alert('Estado confirmado en la planilla: ' + id + ' → ' + nuevoEstado + '. La respuesta inicial del servidor falló.');
-      return;
-    }
+    const r = await callBackend('updateStatus', {id, estado: nuevoEstado, password: adminPassword});
     await loadPurchases();
-    if(result.emailWarning) alert(result.emailWarning);
+    if(r.emailWarning) alert(r.emailWarning);
   }catch(err){
-    alert(err.message);
-  }finally{
-    select.disabled = false;
-    delete select.dataset.saving;
+    alert('Error: '+err.message);
   }
 }
 
@@ -1025,12 +953,11 @@ let ventaBebestiblesQty = {};
 async function loadProductosAdmin(){
   try{
     const r = await callBackend('listProductos', {password: adminPassword});
-    if(!Array.isArray(r.rows)) throw new Error('listProductos no devolvió una lista rows válida.');
     productosCache = r.rows;
     productosCache.forEach(p=>{ if(!(p.id in ventaBebestiblesQty)) ventaBebestiblesQty[p.id] = 0; });
     renderBebestiblesVenta();
     renderGestionBebestibles();
-  }catch(err){ document.getElementById('ventaBebestiblesList').textContent = 'No se pudo cargar el catálogo: ' + err.message; }
+  }catch(err){ /* silencioso */ }
 }
 
 function renderBebestiblesVenta(){
