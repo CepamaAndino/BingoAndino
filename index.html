@@ -321,7 +321,21 @@
   td{ padding:9px 10px; border-bottom:1px solid #f0e6cc; vertical-align:middle;}
   tr:last-child td{ border-bottom:none;}
   .row-actions{ display:flex; gap:6px; flex-wrap:wrap; }
-  .table-wrap{ overflow-x:auto; border-radius:12px; border:1px solid #e6d9bd;}
+  .table-wrap{ overflow:auto; max-height:75vh; border-radius:12px; border:1px solid #e6d9bd; background:#fff;}
+  .table-wrap table{ min-width:1180px; }
+  .table-wrap th{ position:sticky; top:0; z-index:2; white-space:nowrap; }
+  .table-wrap td{ white-space:nowrap; }
+  .table-wrap td.wrap{ white-space:normal; min-width:130px; }
+  .table-wrap .row-actions{ flex-wrap:nowrap; }
+  .table-wrap .estado-select{ min-width:110px; }
+  /* el panel admin usa casi todo el ancho de la pantalla */
+  body.admin-view main{ max-width:1500px; }
+  .gestion-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; cursor:pointer; }
+  .gestion-head h2{ margin:0; }
+  .gestion-head .chev{ font-size:18px; transition:transform .2s; }
+  .gestion-head.open .chev{ transform:rotate(180deg); }
+  #gestionBody{ display:none; margin-top:10px; }
+  #gestionBody.open{ display:block; }
 
   #copyToast{
     position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px);
@@ -433,6 +447,15 @@
 .payment-check{display:flex;gap:10px;align-items:center;text-transform:none;letter-spacing:0;font-size:14px;cursor:pointer;}
 .payment-check input{width:22px;height:22px;flex-shrink:0;}
 .checkout-send{text-decoration:none;}
+.pending-warn{background:#fff3cd;border:2px solid #E3A83A;border-radius:12px;padding:10px 12px;margin:10px 0;font-size:14px;font-weight:700;color:#5a3d00;}
+.copy-msg{display:none;margin-top:8px;padding:8px 10px;border-radius:10px;background:#e6f3ea;color:#2f6a3f;font-weight:700;font-size:13.5px;}
+.notify-panel{margin-top:16px;border:3px solid #E3A83A;background:#fffaf0;border-radius:14px;padding:14px;}
+.notify-panel h3{margin:0 0 6px;}
+.notify-panel.pulse{animation:notifyPulse 1.2s ease 2;}
+@keyframes notifyPulse{0%,100%{box-shadow:0 0 0 0 rgba(227,168,58,0)}50%{box-shadow:0 0 0 8px rgba(227,168,58,.45)}}
+.notify-panel .payment-check{background:#fff;border:1.5px solid #e2d3b0;border-radius:10px;padding:10px;margin:8px 0;font-weight:700;}
+.sticky-avisar{position:fixed;left:50%;transform:translateX(-50%);width:calc(100% - 24px);max-width:520px;box-sizing:border-box;bottom:12px;z-index:60;display:none;margin:0;box-shadow:0 6px 18px rgba(0,0,0,.28);}
+.sticky-avisar.show{display:block;}
 .checkout-send[aria-disabled="true"]{opacity:.5;cursor:not-allowed;}
 @media(max-width:480px){#confirmBox{padding:16px;}#confirmBox .transfer-list .row{flex-direction:column;gap:3px;}#confirmBox .transfer-list .row b{text-align:left;}.checkout-steps{font-size:11px;}}
 </style>
@@ -629,7 +652,11 @@
       </div>
 
       <div class="card" style="margin-bottom:16px;">
-        <h2 style="font-size:16px;">🥤 Gestionar bebestibles</h2>
+        <div class="gestion-head" id="gestionHead" onclick="toggleGestion()" role="button" tabindex="0" aria-expanded="false">
+          <h2 style="font-size:16px;">🥤 Gestionar bebestibles</h2>
+          <span class="chev">▼</span>
+        </div>
+        <div id="gestionBody">
         <p class="sub">Edita precios, agrega o elimina productos del catálogo.</p>
         <div id="gestionBebestiblesList"></div>
         <div style="display:flex; gap:8px; margin-top:12px;">
@@ -638,6 +665,7 @@
           <button class="btn btn-secondary btn-sm" onclick="agregarProducto()">+ Agregar</button>
         </div>
         <div class="err" id="productoErr"></div>
+        </div>
       </div>
 
       <div class="stats">
@@ -715,6 +743,7 @@ document.querySelectorAll('nav.tabs button').forEach(btn=>{
     btn.classList.add('active');
     document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
     document.getElementById('view-'+btn.dataset.view).classList.add('active');
+    document.body.classList.toggle('admin-view', btn.dataset.view==='admin');
   });
 });
 
@@ -882,11 +911,18 @@ async function copyCheckoutText(text){
     showToast();
   }catch(err){ document.getElementById('checkoutErr').textContent='No se pudo copiar. Puedes seleccionar los datos y copiarlos manualmente.'; }
 }
+let stickyObserver=null;
+function afterCopy(){
+  const m=document.getElementById('copyMsg'); if(m) m.style.display='block';
+  const panel=document.getElementById('notifyPanel');
+  if(panel){ panel.classList.remove('pulse'); void panel.offsetWidth; panel.classList.add('pulse'); }
+}
 function copyAllPayment(){
   if(!lastPurchase) return;
   copyCheckoutText(bankDataText()+`\nMonto: $${Number(lastPurchase.monto).toLocaleString('es-CL')}\nCódigo de reserva: ${lastPurchase.id}\nMotivo / Mensaje: ${reservationMotivo(lastPurchase)}`);
+  afterCopy();
 }
-function copyMotivo(){ if(lastPurchase) copyCheckoutText(reservationMotivo(lastPurchase)); }
+function copyMotivo(){ if(lastPurchase){ copyCheckoutText(reservationMotivo(lastPurchase)); afterCopy(); } }
 function purchaseSummary(p){
   const h=escapeHtml;
   const rangeTxt=p.desde===p.hasta ? 'BA-'+pad(p.desde) : 'BA-'+pad(p.desde)+' al BA-'+pad(p.hasta);
@@ -902,6 +938,7 @@ function showConfirmation(p){
     <div class="checkout-steps"><span>1. Compra y datos ✓</span><strong>2. Pago y aviso</strong></div>
     <h2>Notificar compra y realiza tu pago</h2>
     <p class="sub">Tu reserva está creada. Transfiere y luego presiona "Enviar compra".</p>
+    <div class="pending-warn">⚠️ Tu compra todavía NO está enviada. Después de transferir, presiona el botón "Enviar compra" (está más abajo, justo después de los botones de copiar).</div>
     <div class="reservation-header"><span>¡Reserva creada!</span><strong>Código: ${h(p.id)}</strong><span class="badge reservada">Falta enviar la compra</span></div>
     ${sum.html}
     <h3>1. Realiza tu pago</h3>
@@ -917,16 +954,30 @@ function showConfirmation(p){
     <button type="button" class="btn btn-secondary checkout-copy" onclick="copyAllPayment()">Copiar todo para transferir</button>
     <button type="button" class="btn btn-ghost checkout-copy" onclick="copyMotivo()">Copiar solo el motivo</button>
     <div class="err" id="checkoutErr" role="alert"></div>
-    <h3>2. Notifica tu compra</h3>
-    <p class="note">Después de transferir, presiona "Enviar compra". Se usa el mismo código de reserva: no se crea una compra nueva.</p>
-    <label class="payment-check"><input type="checkbox" id="paymentDone"> Ya realicé la transferencia</label>
-    <button type="button" class="btn btn-primary checkout-send" id="sendPurchaseBtn" disabled>Enviar compra</button>
-    <div class="err" id="sendErr" role="alert"></div>
-    <p class="note" id="sendHelp" role="status">Tu reserva ya tiene cartones asignados. El Cepama recibe el aviso cuando presionas "Enviar compra".</p>
+    <div class="copy-msg" id="copyMsg" role="status">✅ Datos copiados. Haz tu transferencia y vuelve aquí: falta el último paso 👇</div>
+    <div class="notify-panel" id="notifyPanel">
+      <h3>2. ÚLTIMO PASO: avisa que ya pagaste</h3>
+      <p class="note" style="margin:0;">Sin este paso tu compra no queda enviada al Cepama. Usa el mismo código de reserva: no se crea una compra nueva.</p>
+      <label class="payment-check"><input type="checkbox" id="paymentDone"> Ya realicé la transferencia</label>
+      <button type="button" class="btn btn-primary checkout-send" id="sendPurchaseBtn" style="width:100%;" disabled>Enviar compra</button>
+      <div class="err" id="sendErr" role="alert"></div>
+    </div>
+    <button type="button" class="btn btn-primary sticky-avisar" id="stickyAvisar">✅ Ya transferí · Ir a enviar la compra</button>
   `;
   const chk=document.getElementById('paymentDone');
   const btn=document.getElementById('sendPurchaseBtn');
   const err=document.getElementById('sendErr');
+  const panel=document.getElementById('notifyPanel');
+  const sticky=document.getElementById('stickyAvisar');
+  sticky.addEventListener('click',()=>{
+    panel.scrollIntoView({behavior:'smooth',block:'center'});
+    panel.classList.remove('pulse'); void panel.offsetWidth; panel.classList.add('pulse');
+  });
+  // el botón flotante se muestra mientras el panel de "Enviar compra" no se ve en pantalla
+  if('IntersectionObserver' in window){
+    stickyObserver=new IntersectionObserver(es=>{ sticky.classList.toggle('show',!es[0].isIntersecting); },{threshold:0.2});
+    stickyObserver.observe(panel);
+  }
   chk.addEventListener('change',()=>{ btn.disabled=!chk.checked; });
   btn.addEventListener('click',async()=>{
     if(!chk.checked || btn.disabled) return;
@@ -942,6 +993,7 @@ function showConfirmation(p){
   box.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function showSent(p){
+  if(stickyObserver){ stickyObserver.disconnect(); stickyObserver=null; }
   const box=document.getElementById('confirmBox');
   const h=escapeHtml;
   const sum=purchaseSummary(p);
@@ -1097,7 +1149,7 @@ function renderTable(){
       <td>${escapeHtml(p.comprador)}</td>
       <td style="font-size:11.5px;">${escapeHtml(p.email||'—')}</td>
       <td>${escapeHtml(p.alumno)}</td>
-      <td>${escapeHtml(p.curso)}</td>
+      <td class="wrap">${escapeHtml(p.curso)}</td>
       <td>+56${p.whatsapp}</td>
       <td>${p.sets||'—'}</td>
       <td>${rangeTxt}</td>
@@ -1340,6 +1392,12 @@ async function eliminarVentaCaja(cId, bId){
 }
 
 /* ============ GESTIONAR BEBESTIBLES (precios/catálogo) ============ */
+function toggleGestion(){
+  const body = document.getElementById('gestionBody'), head = document.getElementById('gestionHead');
+  const abierto = body.classList.toggle('open');
+  head.classList.toggle('open', abierto);
+  head.setAttribute('aria-expanded', String(abierto));
+}
 function renderGestionBebestibles(){
   const box = document.getElementById('gestionBebestiblesList');
   if(!productosCache.length){ box.innerHTML = '<p class="note">Sin productos aún. Agrega uno abajo.</p>'; return; }
