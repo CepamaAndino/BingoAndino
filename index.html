@@ -723,14 +723,35 @@ async function callBackend(action, payload){
   if(!BACKEND_URL || BACKEND_URL.indexOf('PEGA_AQUI') !== -1){
     throw new Error('Falta configurar BACKEND_URL en el código con la URL de tu Apps Script.');
   }
-  const res = await fetch(BACKEND_URL, {
-    method:'POST',
-    headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body: JSON.stringify({action, payload})
-  });
-  const json = await res.json();
-  if(!json.ok) throw new Error(json.error || 'Error desconocido');
-  return json.data;
+  // Se llama SIN cookies ni sesión de Google (credentials:'omit'), para que no importe
+  // cuántas cuentas de Google tenga abiertas el navegador. Si Google responde una página
+  // HTML en vez de datos (pasa a veces), se reintenta hasta 3 veces.
+  const body = JSON.stringify({action, payload});
+  let ultimoError = null;
+  for(let intento = 0; intento < 3; intento++){
+    try{
+      const res = await fetch(BACKEND_URL, {
+        method:'POST',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body,
+        credentials:'omit',
+        redirect:'follow',
+        cache:'no-store'
+      });
+      const txt = await res.text();
+      let json;
+      try{ json = JSON.parse(txt); }
+      catch(e){ throw new Error('__html__'); }
+      if(!json.ok) throw new Error(json.error || 'Error desconocido');
+      return json.data;
+    }catch(err){
+      const esDeRed = err.message === '__html__' || err instanceof TypeError;
+      if(!esDeRed) throw err;           // error real del backend (clave mala, sin cartones, etc.): no reintentar
+      ultimoError = err;
+      await new Promise(r=>setTimeout(r, 700*(intento+1)));
+    }
+  }
+  throw new Error('No pudimos conectar con el servidor. Recarga la página (Ctrl+F5) y vuelve a intentar. Si sigue igual, prueba en una ventana de incógnito.');
 }
 
 /* ============ COPIAR DATOS TRANSFERENCIA ============ */
