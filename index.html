@@ -755,7 +755,9 @@ async function callBackend(action, payload){
   // Se llama SIN cookies ni sesión de Google (credentials:'omit'), para que no importe
   // cuántas cuentas de Google tenga abiertas el navegador. Si Google responde una página
   // HTML en vez de datos (pasa a veces), se reintenta hasta 3 veces.
-  const body = JSON.stringify({action, payload});
+  // requestId: identifica esta acción; si hay que reintentarla, el servidor no la repite (evita reservas dobles)
+  const requestId = Date.now().toString(36)+Math.random().toString(36).slice(2,10);
+  const body = JSON.stringify({action, payload: Object.assign({}, payload, {requestId})});
   let ultimoError = null;
   for(let intento = 0; intento < 3; intento++){
     try{
@@ -772,6 +774,7 @@ async function callBackend(action, payload){
       try{ json = JSON.parse(txt); }
       catch(e){ throw new Error('__html__'); }
       if(!json.ok) throw new Error(json.error || 'Error desconocido');
+      if(json.data === undefined || json.data === null) throw new Error('__html__');  // respuesta incompleta de Google: se reintenta
       return json.data;
     }catch(err){
       const esDeRed = err.message === '__html__' || err instanceof TypeError;
@@ -1094,13 +1097,13 @@ async function loadPurchases(){
       callBackend('listPurchases', {password: adminPassword}),
       callBackend('listBebestiblesVentas', {password: adminPassword})
     ]);
-    purchasesCache = r.rows;
-    bebestiblesVentasCache = rb.rows;
+    purchasesCache = (r && r.rows) || [];
+    bebestiblesVentasCache = (rb && rb.rows) || [];
     updateStats(r);
     renderTable();
     renderVentasCaja();
   }catch(err){
-    alert('Error cargando datos: '+err.message);
+    alert('No se pudieron cargar los datos: '+err.message+'\nPresiona "Actualizar" para reintentar.');
   }finally{
     document.getElementById('loadingMsg').style.display='none';
   }
@@ -1176,13 +1179,18 @@ function renderTable(){
 }
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 
+async function avisoIdNoEncontrado(){
+  alert('Esa compra ya no existe en la planilla (se borró o se reinició desde otra ventana). Voy a actualizar la lista.');
+  await loadPurchases();
+}
 async function saveEstado(id){
   const nuevoEstado = document.getElementById('sel-'+id).value;
   try{
     const r = await callBackend('updateStatus', {id, estado: nuevoEstado, password: adminPassword});
     await loadPurchases();
-    if(r.emailWarning) alert(r.emailWarning);
+    if(r && r.emailWarning) alert(r.emailWarning);
   }catch(err){
+    if(/ID no encontrado/.test(err.message)){ await avisoIdNoEncontrado(); return; }
     alert('Error: '+err.message);
   }
 }
@@ -1556,6 +1564,7 @@ async function deleteOne(id){
     await callBackend('deletePurchase', {id, password: adminPassword});
     await loadPurchases();
   }catch(err){
+    if(/ID no encontrado/.test(err.message)){ await avisoIdNoEncontrado(); return; }
     alert('Error: '+err.message);
   }
 }
