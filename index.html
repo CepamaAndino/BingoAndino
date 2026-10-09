@@ -342,6 +342,8 @@
   .pend-card .acts{ display:flex; gap:8px; margin-top:10px; }
   .btn-aceptar{ flex:2; background:#1fa855; color:#fff; border:none; border-radius:10px; padding:12px 8px; font-weight:900; font-size:15px; cursor:pointer; }
   .btn-rechazar{ flex:1.4; background:#fff; color:var(--rech); border:2px solid var(--rech); border-radius:10px; padding:10px 8px; font-weight:800; cursor:pointer; }
+  .btn-recordar{ width:100%; margin-top:8px; background:#fff; color:#128C4A; border:2px solid #25D366; border-radius:10px; padding:10px 8px; font-weight:800; cursor:pointer; font-size:14px; }
+  .btn-recordar:hover{ background:#25D366; color:#fff; }
   .btn-aceptar:disabled,.btn-rechazar:disabled{ opacity:.5; cursor:wait; }
   .pend-vacio{ background:#eef7f0; border:1.5px dashed var(--ok); border-radius:14px; padding:18px; text-align:center; color:var(--ok); font-weight:800; }
   .hist-box{ background:#fff; border:1px solid #e6d9bd; border-radius:12px; overflow:hidden; max-height:75vh; overflow-y:auto; }
@@ -1209,6 +1211,7 @@ function renderTable(){
         <button type="button" class="btn-rechazar" onclick="cambiarEstado('${p.id}','rechazada',this)">✕ Rechazar</button>
         <button type="button" class="ib" style="width:42px;border-radius:10px;border:1.5px solid #d9c9a0;background:#fff;cursor:pointer;" title="Eliminar" onclick="deleteOne('${p.id}')">🗑️</button>
       </div>
+      ${p.whatsapp ? `<button type="button" class="btn-recordar" onclick="sendRecordatorioPago('${p.id}')">💬 Recordar pago por WhatsApp</button>` : ''}
     </div>`).join('')
     : `<div class="pend-vacio">${q ? 'Sin pendientes que coincidan' : '🎉 No hay compras por revisar'}</div>`;
 
@@ -1657,6 +1660,28 @@ function sendWhatsapp(p){
     `Tus cartones son: ${rangeTxt}. Se entregan de forma física, preséntate con tu número de reserva (${p.id}) para retirarlos. ¡Gracias por apoyar a ${p.alumno}!`
   );
   window.open(`https://wa.me/56${p.whatsapp}?text=${msg}`, '_blank');
+}
+
+/* ============ RECORDATORIO DE PAGO PENDIENTE (WhatsApp) ============ */
+function recordatorioPagoMsg(p){
+  const rangeTxt = p.desde===p.hasta ? ('BA-'+pad(p.desde)) : ('BA-'+pad(p.desde)+' al BA-'+pad(p.hasta));
+  const monto = Number(p.monto).toLocaleString('es-CL');
+  const motivo = `${p.comprador} - ${p.curso} - ${p.id}`;
+  let msg = `Hola ${p.comprador}! Te escribimos de CEPAMA, BINGO ANDINO 2026 🎟️.\n\n`+
+    `Tu reserva ${p.id} (${p.cantidad} cartones, ${rangeTxt}) por $${monto} aún tiene el pago PENDIENTE ⏳.\n\n`;
+  if(p.sinAviso){
+    msg += `Si ya transferiste, entra a la página y presiona "Enviar compra", o mándanos el comprobante por este medio.\n`;
+  } else {
+    msg += `Si ya transferiste, por favor envíanos el comprobante por este medio para validar tu compra.\n`;
+  }
+  msg += `Si aún no lo haces, puedes transferir a:\n${bankDataText()}\nMonto: $${monto}\nMotivo: ${motivo}\n\n`+
+    `¡Gracias por apoyar a ${p.alumno || 'nuestro colegio'}! 🙌`;
+  return msg;
+}
+function sendRecordatorioPago(id){
+  const p = purchasesCache.find(x=>x.id===id);
+  if(!p || !p.whatsapp) return;
+  window.open(`https://wa.me/56${p.whatsapp}?text=${encodeURIComponent(recordatorioPagoMsg(p))}`, '_blank');
 }
 
 /* ============ ELIMINAR UNA COMPRA ============ */
