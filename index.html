@@ -1603,7 +1603,7 @@ function imprimirVoucherCompleto(r){
     const rango = r.cartones.desde===r.cartones.hasta ? ('BA-'+pad(r.cartones.desde)) : ('BA-'+pad(r.cartones.desde)+' al BA-'+pad(r.cartones.hasta));
     html += `
       <p style="font-size:15px;margin:10px 0 2px;font-weight:bold;">N° ${r.cartones.id}</p>
-      <p style="font-size:13px;margin:2px 0;">Cartones: ${rango} (${r.cartones.cantidad})</p>
+      ${bloqueEntrega(r.cartones.cantidad, rango)}
       <p style="font-size:13px;margin:2px 0;">Monto cartones: $${Number(r.cartones.monto).toLocaleString('es-CL')}</p>
     `;
   }
@@ -1635,6 +1635,30 @@ function imprimirVoucherCompleto(r){
 
 function imprimirVoucherId(id){ const p=purchasesCache.find(x=>x.id===id); if(p) imprimirVoucher(p); }
 function sendWhatsappId(id){ const p=purchasesCache.find(x=>x.id===id); if(p) sendWhatsapp(p); }
+// Bloque grande con la cantidad de cartones a entregar (para que se lea de un vistazo al entregar)
+function bloqueEntrega(cantidad, rangoTxt){
+  const n = Number(cantidad)||0;
+  const sets = Math.floor(n/6), sueltos = n%6;
+  const big = 'font-size:34px;font-weight:900;line-height:1.1;';
+  let lineas;
+  if(sets>0 && sueltos===0){
+    lineas = `<div style="${big}">${sets} ${sets===1?'SET':'SETS'}</div>
+              <div style="${big}">= ${n} CARTONES</div>
+              <div style="font-size:12px;margin-top:3px;">(1 set = 6 cartones)</div>`;
+  } else if(sets>0){
+    lineas = `<div style="font-size:24px;font-weight:900;line-height:1.2;">${sets} ${sets===1?'SET':'SETS'} + ${sueltos} ${sueltos===1?'CARTÓN':'CARTONES'}</div>
+              <div style="${big}">= ${n} CARTONES</div>
+              <div style="font-size:12px;margin-top:3px;">(1 set = 6 cartones)</div>`;
+  } else {
+    lineas = `<div style="${big}">${n} ${n===1?'CARTÓN':'CARTONES'}</div>`;
+  }
+  return `
+    <div style="border:3px solid #000;border-radius:10px;margin:12px 0;padding:8px 6px;">
+      <div style="font-size:14px;font-weight:bold;letter-spacing:1px;margin-bottom:2px;">ENTREGAR</div>
+      ${lineas}
+      <div style="font-size:17px;font-weight:bold;margin-top:6px;border-top:2px dashed #000;padding-top:5px;">${rangoTxt}</div>
+    </div>`;
+}
 function imprimirVoucher(p){
   const rangeTxt = p.desde===p.hasta ? ('BA-'+pad(p.desde)) : ('BA-'+pad(p.desde)+' al BA-'+pad(p.hasta));
   document.getElementById('voucherContent').innerHTML = `
@@ -1644,7 +1668,7 @@ function imprimirVoucher(p){
     <hr>
     <p style="font-size:22px;font-weight:bold;margin:10px 0;">${p.id}</p>
     <p style="font-size:14px;margin:6px 0;">Comprador: <b>${escapeHtml(p.comprador||'—')}</b></p>
-    <p style="font-size:14px;margin:6px 0;">Cartones: <b>${rangeTxt} (${p.cantidad})</b></p>
+    ${bloqueEntrega(p.cantidad, rangeTxt)}
     <p style="font-size:14px;margin:6px 0;">Monto pagado: <b>$${Number(p.monto).toLocaleString('es-CL')}</b></p>
     <p style="font-size:11px;margin:10px 0 0;">Fecha: ${new Date().toLocaleString('es-CL')}</p>
     <hr>
