@@ -257,29 +257,35 @@
   .caja-head .nombre-box label{ font-size:11px; margin:0 0 3px; }
   .caja-wrap{ display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:16px; align-items:start; }
   @media (max-width:860px){ .caja-wrap{ grid-template-columns:1fr; } }
-  .caja-tabs{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
-  .caja-tabs button{ padding:10px 6px; border-radius:10px; border:1.5px solid #e2d3b0; background:#f5efe0; font-weight:800; font-size:14px; cursor:pointer; color:var(--tinta); }
+  .caja-wrap > *{ min-width:0; }
+  .caja-tabs{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px; }
+  @media (max-width:520px){ .caja-tabs{ grid-template-columns:repeat(2,1fr); } }
+  .caja-tabs button{ padding:12px 6px; border-radius:12px; border:1.5px solid var(--turquesa); background:#fff; font-weight:800; font-size:15px; cursor:pointer; color:var(--tinta); }
   .caja-tabs button.active{ background:var(--turquesa); border-color:var(--turquesa-dark); color:#fff; }
-  .caja-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; }
-  .caja-item{ border:1.5px solid #e2d3b0; border-radius:12px; padding:10px; background:#fff; display:flex; flex-direction:column; gap:8px; }
-  .caja-item.has{ border-color:var(--ok); background:#eef7f0; box-shadow:0 0 0 2px rgba(63,125,79,.18); }
-  .caja-item .top{ display:flex; align-items:center; gap:10px; }
-  .caja-item .ic{ font-size:30px; line-height:1; }
-  .caja-item .nm{ font-weight:700; font-size:13px; line-height:1.2; }
-  .caja-item .pr{ font-weight:900; font-size:17px; }
+  .caja-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:12px; }
+  .caja-item{ position:relative; min-height:128px; border:2px solid #e2d3b0; border-radius:16px; padding:10px 8px; background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:2px; cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent; transition:transform .08s; }
+  .caja-item:active{ transform:scale(.96); }
+  .caja-item.has{ border-color:var(--ok); background:#eef7f0; box-shadow:0 0 0 3px rgba(63,125,79,.2); }
+  .caja-item .ic{ font-size:36px; line-height:1.1; }
+  .caja-item .nm{ font-weight:700; font-size:13.5px; line-height:1.15; }
+  .caja-item .pr{ font-weight:900; font-size:19px; }
   .caja-item .sb{ font-size:11px; color:#7a6a4f; }
-  .caja-item .qty-controls{ justify-content:space-between; }
-  .caja-item .qty-btn{ width:38px; height:38px; font-size:20px; border-radius:10px; background:#f1e9d3; border-color:#d9c9a0; }
-  .caja-item .qty-val{ font-size:18px; min-width:30px; }
+  .caja-item .bdg{ position:absolute; top:-9px; right:-9px; min-width:32px; height:32px; padding:0 6px; border-radius:99px; background:var(--ok); color:#fff; font-weight:900; font-size:17px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,.25); }
+  .caja-item .menos{ position:absolute; top:-10px; left:-10px; width:38px; height:38px; border-radius:50%; background:#f1e9d3; border:1.5px solid #d9c9a0; font-weight:900; font-size:22px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .caja-item.mas{ border-style:dashed; color:#7a6a4f; background:transparent; }
+  .quick-row{ display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-top:8px; }
+  @media (max-width:520px){ .quick-row{ grid-template-columns:repeat(3,1fr); } }
+  .quick-row button{ padding:11px 2px; font-size:13px; font-weight:800; letter-spacing:0; }
+  .quick-row button.on{ border-color:var(--ok); background:#eef7f0; }
+  .quick-row button:disabled{ opacity:.35; cursor:not-allowed; }
+  #registrarVentaBtn.cobrar{ font-weight:900; background:#1fa855; color:#fff; border-color:#168a45; font-size:22px; padding:20px 10px; letter-spacing:.3px; }
+  #registrarVentaBtn.cobrar:disabled{ background:#e9d6a3; color:#7a6a4f; font-size:15px; padding:16px 10px; }
   .caja-resumen{ position:sticky; top:10px; }
   @media (max-width:860px){ .caja-resumen{ position:static; } }
   .res-line{ display:flex; justify-content:space-between; gap:8px; padding:7px 0; border-bottom:1px solid #f0e6cc; font-size:14px; }
   .res-empty{ color:#7a6a4f; font-size:13px; padding:8px 0; }
   .res-total{ display:flex; justify-content:space-between; align-items:center; background:#fbeccb; border-radius:12px; padding:12px 14px; margin:12px 0; }
   .res-total b{ font-size:28px; }
-  .quick-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:8px; }
-  .quick-row button{ padding:8px 4px; font-size:13px; }
-  .quick-row button.on{ border-color:var(--ok); background:#eef7f0; font-weight:800; }
   .vuelto-box{ border-radius:12px; padding:10px 14px; margin-top:10px; display:flex; justify-content:space-between; align-items:center; background:#e6f3ea; color:var(--ok); }
   .vuelto-box.falta{ background:#f8e3e3; color:var(--rech); }
   .vuelto-box b{ font-size:26px; }
@@ -321,6 +327,40 @@
   td{ padding:9px 10px; border-bottom:1px solid #f0e6cc; vertical-align:middle;}
   tr:last-child td{ border-bottom:none;}
   .row-actions{ display:flex; gap:6px; flex-wrap:wrap; }
+
+  /* ===== REVISIÓN DE COMPRAS (pendientes arriba + historial compacto) ===== */
+  .rev-layout{ display:grid; grid-template-columns:minmax(300px,1fr) minmax(0,1.9fr); gap:16px; align-items:start; }
+  .rev-layout.solo{ grid-template-columns:1fr; }
+  .rev-layout.solo #pendList{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:10px; }
+  @media (max-width:980px){ .rev-layout{ grid-template-columns:1fr; } }
+  .rev-title{ font-size:16px; margin:0 0 8px; }
+  .pend-card{ background:#fff8e6; border:2px solid var(--mostaza); border-radius:14px; padding:12px; margin-bottom:10px; }
+  .pend-card .l1{ display:flex; justify-content:space-between; gap:8px; font-weight:800; font-size:15px; }
+  .pend-card .l2{ font-size:13px; margin:4px 0; }
+  .pend-card .l3{ font-size:12px; color:#7a6a4f; overflow-wrap:anywhere; }
+  .pend-card .sin{ display:inline-block; margin-top:4px; font-size:11px; font-weight:800; color:#8a5a00; background:#fbe9c4; border-radius:99px; padding:2px 8px; }
+  .pend-card .acts{ display:flex; gap:8px; margin-top:10px; }
+  .btn-aceptar{ flex:2; background:#1fa855; color:#fff; border:none; border-radius:10px; padding:12px 8px; font-weight:900; font-size:15px; cursor:pointer; }
+  .btn-rechazar{ flex:1.4; background:#fff; color:var(--rech); border:2px solid var(--rech); border-radius:10px; padding:10px 8px; font-weight:800; cursor:pointer; }
+  .btn-aceptar:disabled,.btn-rechazar:disabled{ opacity:.5; cursor:wait; }
+  .pend-vacio{ background:#eef7f0; border:1.5px dashed var(--ok); border-radius:14px; padding:18px; text-align:center; color:var(--ok); font-weight:800; }
+  .hist-box{ background:#fff; border:1px solid #e6d9bd; border-radius:12px; overflow:hidden; max-height:75vh; overflow-y:auto; }
+  .hist-head,.hist-row{ display:grid; grid-template-columns:64px minmax(0,1.4fr) minmax(0,1.3fr) minmax(0,1fr) 78px 96px 118px; gap:8px; align-items:center; padding:8px 10px; }
+  .hist-head{ background:var(--turquesa-dark); color:#fff; font-size:11px; font-weight:800; text-transform:uppercase; position:sticky; top:0; z-index:2; }
+  .hist-row{ border-bottom:1px solid #f0e6cc; font-size:13px; }
+  .hist-row:last-child{ border-bottom:none; }
+  .hist-row small{ display:block; color:#7a6a4f; font-size:11.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .hist-row .t{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .hist-row .acc{ display:flex; gap:5px; justify-content:flex-end; align-items:center; }
+  .hist-row .ib{ width:32px; height:32px; border-radius:8px; border:1.5px solid #d9c9a0; background:#fff; cursor:pointer; font-size:14px; padding:0; }
+  .hist-row select.mas{ width:46px; height:32px; border-radius:8px; border:1.5px solid #d9c9a0; background:#fff; font-weight:900; font-size:15px; cursor:pointer; padding:0 0 0 10px; }
+  .tag-caja{ font-size:10px; font-weight:800; background:#e6e9f5; color:var(--turquesa); border-radius:99px; padding:1px 6px; margin-left:4px; }
+  @media (max-width:760px){
+    .hist-head{ display:none; }
+    .hist-row{ grid-template-columns:1fr 1fr; row-gap:6px; column-gap:10px; }
+    .hist-row > :nth-child(1){ font-size:14px; }
+    .hist-row .acc{ grid-column:1 / -1; justify-content:flex-start; }
+  }
   .table-wrap{ overflow:auto; max-height:75vh; border-radius:12px; border:1px solid #e6d9bd; background:#fff;}
   .table-wrap table{ min-width:1180px; }
   .table-wrap th{ position:sticky; top:0; z-index:2; white-space:nowrap; }
@@ -607,9 +647,10 @@
         <div class="caja-wrap">
           <div>
             <div class="caja-tabs" id="cajaTabs">
+              <button type="button" class="active" data-tab="top" onclick="setCajaTab('top')">⭐ Más vendidos</button>
               <button type="button" data-tab="cartones" onclick="setCajaTab('cartones')">🎟️ Cartones</button>
               <button type="button" data-tab="bebestibles" onclick="setCajaTab('bebestibles')">🥤 Bebestibles</button>
-              <button type="button" class="active" data-tab="todos" onclick="setCajaTab('todos')">▦ Todos</button>
+              <button type="button" data-tab="todos" onclick="setCajaTab('todos')">▦ Todo</button>
             </div>
             <div class="caja-grid" id="cajaGrid"></div>
           </div>
@@ -688,16 +729,15 @@
         <button class="btn btn-sm" style="background:var(--rech);color:#fff;" onclick="openResetModal()">🗑️ Resetear todo</button>
       </div>
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th><th>Fecha</th><th>Comprador</th><th>Email</th><th>Alumno</th><th>Curso</th>
-              <th>WhatsApp</th><th>Sets</th><th>Cartones</th><th>Monto</th><th>Estado</th><th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody"></tbody>
-        </table>
+      <div class="rev-layout" id="revLayout">
+        <div class="rev-col" id="pendCol">
+          <h3 class="rev-title">⏳ Por revisar <span id="pendCount">(0)</span></h3>
+          <div id="pendList"></div>
+        </div>
+        <div class="rev-col" id="histCol">
+          <h3 class="rev-title">✅ Historial <span id="histCount">(0)</span></h3>
+          <div class="hist-box"><div class="hist-head"><span>ID</span><span>Comprador · Email</span><span>Alumno · Curso</span><span>Cartones</span><span>Monto</span><span>Estado</span><span style="text-align:right">Acciones</span></div><div id="histList"></div></div>
+        </div>
       </div>
       <p class="spinner" id="loadingMsg" style="display:none;">Cargando...</p>
     </div>
@@ -1135,47 +1175,85 @@ document.getElementById('searchBox').addEventListener('input', renderTable);
 
 function renderTable(){
   const q = document.getElementById('searchBox').value.toLowerCase();
-  const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = '';
-  const filtered = purchasesCache.filter(p=>{
-    if(currentFilter!=='todas' && p.estado!==currentFilter) return false;
-    if(q && !(p.comprador+p.alumno+p.curso).toLowerCase().includes(q)) return false;
-    return true;
-  }).sort((a,b)=> new Date(b.fecha) - new Date(a.fecha));
+  const filtroTxt = c => (c.comprador+' '+c.alumno+' '+c.curso).toLowerCase().includes(q);
+  const ordenadas = purchasesCache.filter(p=> !q || filtroTxt(p))
+    .sort((a,b)=> new Date(b.fecha) - new Date(a.fecha));
+  const pend = ordenadas.filter(p=>p.estado==='pendiente');
+  const hist = ordenadas.filter(p=>p.estado!=='pendiente' && (currentFilter==='todas' || currentFilter===p.estado));
+  const totalPend = purchasesCache.filter(p=>p.estado==='pendiente').length;
 
-  filtered.forEach(p=>{
-    const rangeTxt = p.desde===p.hasta ? ('BA-'+pad(p.desde)) : ('BA-'+pad(p.desde)+' a '+pad(p.hasta));
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${p.id}</td>
-      <td>${new Date(p.fecha).toLocaleDateString('es-CL')}</td>
-      <td>${escapeHtml(p.comprador)}</td>
-      <td style="font-size:11.5px;">${escapeHtml(p.email||'—')}</td>
-      <td>${escapeHtml(p.alumno)}</td>
-      <td class="wrap">${escapeHtml(p.curso)}</td>
-      <td>+56${p.whatsapp}</td>
-      <td>${p.sets||'—'}</td>
-      <td>${rangeTxt}</td>
-      <td>$${Number(p.monto).toLocaleString('es-CL')}</td>
-      <td><span class="badge ${p.estado}">${p.estado}</span>${p.sinAviso ? '<br><small style="color:#7a6a4f;">reserva sin enviar</small>' : ''}</td>
-      <td>
-        <div class="row-actions">
-          <select class="estado-select" id="sel-${p.id}">
-            <option value="pendiente" ${p.estado==='pendiente'?'selected':''}>Pendiente</option>
-            <option value="aceptada" ${p.estado==='aceptada'?'selected':''}>Aceptada</option>
-            <option value="rechazada" ${p.estado==='rechazada'?'selected':''}>Rechazada</option>
-          </select>
-          <button class="btn btn-secondary btn-sm" onclick="saveEstado('${p.id}')">Guardar</button>
-          <button class="btn btn-sm" style="background:var(--rech);color:#fff;" onclick="deleteOne('${p.id}')">🗑️</button>
-          ${p.estado==='aceptada' ? `
-            <button class="btn btn-ghost btn-sm" onclick="imprimirVoucherId('${p.id}')">🖨️</button>
-            ${p.whatsapp ? `<button class="btn btn-wsp btn-sm" onclick="sendWhatsappId('${p.id}')">💬</button>` : ''}
-          ` : ''}
-        </div>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
+  // etiqueta con el número de pendientes en el filtro
+  const chipPend = document.querySelector('.filter-chip[data-estado="pendiente"]');
+  if(chipPend) chipPend.textContent = 'Pendientes' + (totalPend ? ' ('+totalPend+')' : '');
+
+  const verPend = currentFilter==='todas' || currentFilter==='pendiente';
+  const verHist = currentFilter!=='pendiente';
+  document.getElementById('pendCol').style.display = verPend ? '' : 'none';
+  document.getElementById('histCol').style.display = verHist ? '' : 'none';
+  document.getElementById('revLayout').classList.toggle('solo', !(verPend && verHist));
+  document.getElementById('pendCount').textContent = '('+pend.length+')';
+  document.getElementById('histCount').textContent = '('+hist.length+')';
+
+  const rango = p => p.desde===p.hasta ? ('BA-'+pad(p.desde)) : ('BA-'+pad(p.desde)+' a '+pad(p.hasta));
+  const monto = p => '$'+Number(p.monto).toLocaleString('es-CL');
+
+  // ----- tarjetas por revisar -----
+  document.getElementById('pendList').innerHTML = pend.length ? pend.map(p=>`
+    <div class="pend-card" id="card-${p.id}">
+      <div class="l1"><span>${p.id} · ${escapeHtml(p.comprador||'—')}</span><span>${monto(p)}</span></div>
+      <div class="l2">${escapeHtml(p.alumno||'—')} — ${escapeHtml(p.curso||'—')} · ${rango(p)}${p.sets ? ' ('+p.sets+' sets)' : ' ('+p.cantidad+' cartones)'}</div>
+      <div class="l3">${p.whatsapp ? '+56'+escapeHtml(p.whatsapp)+' · ' : ''}${escapeHtml(p.email||'sin email')} · ${new Date(p.fecha).toLocaleDateString('es-CL')}</div>
+      ${p.sinAviso ? '<span class="sin">reserva sin enviar</span>' : ''}
+      <div class="acts">
+        <button type="button" class="btn-aceptar" onclick="cambiarEstado('${p.id}','aceptada',this)">✓ Aceptar</button>
+        <button type="button" class="btn-rechazar" onclick="cambiarEstado('${p.id}','rechazada',this)">✕ Rechazar</button>
+        <button type="button" class="ib" style="width:42px;border-radius:10px;border:1.5px solid #d9c9a0;background:#fff;cursor:pointer;" title="Eliminar" onclick="deleteOne('${p.id}')">🗑️</button>
+      </div>
+    </div>`).join('')
+    : `<div class="pend-vacio">${q ? 'Sin pendientes que coincidan' : '🎉 No hay compras por revisar'}</div>`;
+
+  // ----- historial compacto -----
+  document.getElementById('histList').innerHTML = hist.length ? hist.map(p=>`
+    <div class="hist-row">
+      <b>${p.id}</b>
+      <span class="t"><b>${escapeHtml(p.comprador||'—')}</b>${p.modo==='presencial' ? '<span class="tag-caja">caja</span>' : ''}<small>${escapeHtml(p.email||'—')}</small></span>
+      <span class="t">${escapeHtml(p.alumno||'—')}<small>${escapeHtml(p.curso||'')}</small></span>
+      <span class="t">${rango(p)}<small>${p.sets ? p.sets+' sets' : p.cantidad+' cartones'}</small></span>
+      <b>${monto(p)}</b>
+      <span><span class="badge ${p.estado}">${p.estado}</span></span>
+      <span class="acc">
+        ${p.estado==='aceptada' ? `<button type="button" class="ib" title="Voucher" onclick="imprimirVoucherId('${p.id}')">🖨️</button>` : ''}
+        ${(p.estado==='aceptada' && p.whatsapp) ? `<button type="button" class="ib" title="WhatsApp" onclick="sendWhatsappId('${p.id}')">💬</button>` : ''}
+        <select class="mas" title="Más opciones" onchange="accionFila('${p.id}',this)">
+          <option value="">⋯</option>
+          ${p.estado!=='aceptada' ? '<option value="aceptada">✓ Pasar a Aceptada</option>' : ''}
+          ${p.estado!=='pendiente' ? '<option value="pendiente">⏳ Pasar a Pendiente</option>' : ''}
+          ${p.estado!=='rechazada' ? '<option value="rechazada">✕ Pasar a Rechazada</option>' : ''}
+          <option value="eliminar">🗑️ Eliminar</option>
+        </select>
+      </span>
+    </div>`).join('')
+    : '<p class="note" style="padding:14px;">Sin compras en esta vista.</p>';
+}
+function accionFila(id, sel){
+  const v = sel.value; sel.value = '';
+  if(!v) return;
+  if(v==='eliminar') return deleteOne(id);
+  return cambiarEstado(id, v, null);
+}
+async function cambiarEstado(id, estado, btn){
+  if(estado==='rechazada' && !confirm('¿Rechazar la compra '+id+'? Sus cartones vuelven a quedar disponibles para vender.')) return;
+  const card = document.getElementById('card-'+id);
+  if(card) card.querySelectorAll('button').forEach(b=> b.disabled = true);
+  try{
+    const r = await callBackend('updateStatus', {id, estado, password: adminPassword});
+    await loadPurchases();
+    if(r && r.emailWarning) alert(r.emailWarning);
+  }catch(err){
+    if(card) card.querySelectorAll('button').forEach(b=> b.disabled = false);
+    if(/ID no encontrado/.test(err.message)){ await avisoIdNoEncontrado(); return; }
+    alert('Error: '+err.message);
+  }
 }
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 
@@ -1210,7 +1288,7 @@ async function loadProductosAdmin(){
 }
 
 /* ============ CAJA: VENTA PRESENCIAL ============ */
-let cajaTab = 'todos';
+let cajaTab = 'top';
 let unidadesSueltas = 0;
 let setsCount = 0;
 let metodoPago = 'efectivo';
@@ -1237,24 +1315,47 @@ function cajaItems(){
   return items;
 }
 function setCajaTab(t){ cajaTab = t; renderCaja(); }
+// ranking de más vendidos, según las ventas presenciales ya registradas
+function topKeys(items){
+  const cuenta = {};
+  items.forEach(i=> cuenta[i.k] = 0);
+  purchasesCache.filter(p=>p.modo==='presencial').forEach(p=>{
+    const c = Number(p.cantidad)||0;
+    cuenta.s += Math.floor(c/6); cuenta.u += c%6;
+  });
+  const porNombre = {};
+  productosCache.forEach(pr=> porNombre[String(pr.nombre).trim().toLowerCase()] = pr.id);
+  bebestiblesVentasCache.forEach(b=>{
+    String(b.items||'').split(', ').forEach(t=>{
+      const m = t.match(/^(.*) x(\d+)$/);
+      if(m){ const id = porNombre[m[1].trim().toLowerCase()]; if(id) cuenta[id] += Number(m[2]); }
+    });
+  });
+  // más vendidos primero; si empatan, queda el orden del catálogo (cartones primero)
+  return items.map((i,ix)=>({k:i.k,ix,n:cuenta[i.k]||0}))
+    .sort((a,b)=> b.n-a.n || a.ix-b.ix).slice(0,8).map(x=>x.k);
+}
 function renderCaja(){
   document.querySelectorAll('#cajaTabs button').forEach(b=> b.classList.toggle('active', b.dataset.tab===cajaTab));
-  const items = cajaItems().filter(i=> cajaTab==='todos' || i.tipo===cajaTab);
+  const todos = cajaItems();
+  let items;
+  if(cajaTab==='top'){
+    const top = topKeys(todos);
+    items = top.map(k=> todos.find(i=>i.k===k));                      // en orden de más vendido
+    todos.forEach(i=>{ if(i.qty>0 && top.indexOf(i.k)===-1) items.push(i); });  // lo ya elegido siempre se ve
+  }
+  else items = todos.filter(i=> cajaTab==='todos' || i.tipo===cajaTab);
   const grid = document.getElementById('cajaGrid');
   if(!items.length){ grid.innerHTML = '<p class="note">No hay productos en el catálogo todavía.</p>'; }
   else grid.innerHTML = items.map(i=>`
-    <div class="caja-item ${i.qty>0?'has':''}">
-      <div class="top">
-        <div class="ic">${i.icon}</div>
-        <div><div class="nm">${escapeHtml(i.nombre)}</div><div class="pr">$${i.precio.toLocaleString('es-CL')}</div></div>
-      </div>
+    <div class="caja-item ${i.qty>0?'has':''}" role="button" tabindex="0" onclick="cajaCambiar('${i.k}',1)">
+      ${i.qty>0 ? `<div class="bdg">${i.qty}</div><button type="button" class="menos" title="Quitar uno" onclick="event.stopPropagation();cajaCambiar('${i.k}',-1)">−</button>` : ''}
+      <div class="ic">${i.icon}</div>
+      <div class="nm">${escapeHtml(i.nombre)}</div>
+      <div class="pr">$${i.precio.toLocaleString('es-CL')}</div>
       ${i.sub ? `<div class="sb">${escapeHtml(i.sub)}</div>` : ''}
-      <div class="qty-controls">
-        <button type="button" class="qty-btn" onclick="cajaCambiar('${i.k}',-1)">−</button>
-        <span class="qty-val">${i.qty}</span>
-        <button type="button" class="qty-btn" onclick="cajaCambiar('${i.k}',1)">+</button>
-      </div>
-    </div>`).join('');
+    </div>`).join('')
+    + (cajaTab==='top' ? `<div class="caja-item mas" role="button" tabindex="0" onclick="setCajaTab('todos')"><div class="ic">＋</div><div class="nm">Ver todos</div></div>` : '');
   calcularTotalVenta();
 }
 // nombres antiguos (los usan otras partes de la página)
@@ -1306,11 +1407,11 @@ function actualizarVuelto(total){
   }
 }
 function renderQuickMontos(total){
-  const billetes = [1000,2000,5000,10000,15000,20000,30000,40000,50000];
-  const sugeridos = billetes.filter(b=> b > total).slice(0,2);
+  const billetes = [5000,10000,15000,20000];
   const quick = document.getElementById('quickMonto');
-  const btns = [`<button type="button" class="btn btn-ghost ${montoRecibido===total&&total>0?'on':''}" onclick="setMontoRecibido('exacto')">Exacto</button>`]
-    .concat(sugeridos.map(v=>`<button type="button" class="btn btn-ghost ${montoRecibido===v?'on':''}" onclick="setMontoRecibido(${v})">$${v.toLocaleString('es-CL')}</button>`));
+  const habilitado = total > 0;
+  const btns = [`<button type="button" class="btn btn-ghost ${montoRecibido===total&&total>0?'on':''}" ${habilitado?'':'disabled'} onclick="setMontoRecibido('exacto')">Exacto</button>`]
+    .concat(billetes.map(v=>`<button type="button" class="btn btn-ghost ${montoRecibido===v?'on':''}" ${(habilitado && v>=total)?'':'disabled'} onclick="setMontoRecibido(${v})">$${v.toLocaleString('es-CL')}</button>`));
   quick.innerHTML = btns.join('');
 }
 
@@ -1338,8 +1439,9 @@ function calcularTotalVenta(){
   const btn = document.getElementById('registrarVentaBtn');
   const haySeleccion = lineas.length > 0;
   btn.disabled = !haySeleccion || faltaPlata;
-  btn.textContent = !haySeleccion ? 'Selecciona cartones o bebestibles'
-    : faltaPlata ? 'Falta plata para completar' : '🖨️ Registrar venta · $'+total.toLocaleString('es-CL');
+  btn.classList.add('cobrar');
+  btn.textContent = !haySeleccion ? 'Toca los productos para armar la venta'
+    : faltaPlata ? 'Falta plata para completar' : 'COBRAR · $'+total.toLocaleString('es-CL');
 
   renderQuickMontos(total);
   actualizarVuelto(total);
