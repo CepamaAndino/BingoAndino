@@ -1805,16 +1805,15 @@ function imprimirVoucherCompleto(r){
   if(r.cartones){
     const rango = r.cartones.desde===r.cartones.hasta ? ('BA-'+pad(r.cartones.desde)) : ('BA-'+pad(r.cartones.desde)+' al BA-'+pad(r.cartones.hasta));
     html += `
-      <p style="font-size:15px;margin:10px 0 2px;font-weight:bold;">N° ${r.cartones.id}</p>
-      ${bloqueEntrega(r.cartones.cantidad, rango)}
-      <p style="font-size:13px;margin:2px 0;">Monto cartones: $${Number(r.cartones.monto).toLocaleString('es-CL')}</p>
+      <p style="font-size:12px;margin:8px 0 -6px;">N° ${r.cartones.id}</p>
+      ${bloqueEntrega(r.cartones.cantidad, rango, true)}
+      <p style="font-size:12px;margin:2px 0;">Cartones: $${Number(r.cartones.monto).toLocaleString('es-CL')}</p>
     `;
   }
   if(r.bebestibles){
     html += `
-      <p style="font-size:15px;margin:10px 0 2px;font-weight:bold;">N° ${r.bebestibles.id}</p>
-      <p style="font-size:13px;margin:2px 0;">${escapeHtml(r.bebestibles.items)}</p>
-      <p style="font-size:13px;margin:2px 0;">Monto bebestibles: $${Number(r.bebestibles.monto).toLocaleString('es-CL')}</p>
+      ${bloqueBebestibles(r.bebestibles.id, r.bebestibles.items)}
+      <p style="font-size:12px;margin:2px 0;">Bebestibles: $${Number(r.bebestibles.monto).toLocaleString('es-CL')}</p>
     `;
   }
   html += `<hr><p style="font-size:17px;font-weight:bold;">TOTAL: $${Number(r.montoTotal).toLocaleString('es-CL')}</p>`;
@@ -1839,27 +1838,47 @@ function imprimirVoucherCompleto(r){
 function imprimirVoucherId(id){ const p=purchasesCache.find(x=>x.id===id); if(p) imprimirVoucher(p); }
 function sendWhatsappId(id){ const p=purchasesCache.find(x=>x.id===id); if(p) sendWhatsapp(p); }
 // Bloque grande con la cantidad de cartones a entregar (para que se lea de un vistazo al entregar)
-function bloqueEntrega(cantidad, rangoTxt){
+function bloqueBebestibles(id, items){
+  const lineas = String(items||'').split(/,\s*/).filter(Boolean).map(it=>{
+    const m = it.match(/^(.*?)\s*x\s*(\d+)$/i);
+    const nombre = escapeHtml(m ? m[1].trim() : it), cant = m ? m[2] : '';
+    return `<div style="display:flex;gap:6px;align-items:flex-start;text-align:left;padding:3px 0;border-bottom:1px dashed #000;">
+      <span style="font-size:16px;line-height:1;">☐</span>
+      ${cant ? `<span style="font-size:18px;font-weight:900;line-height:1.1;min-width:26px;">${cant}×</span>` : ''}
+      <span style="font-size:13px;font-weight:800;line-height:1.2;flex:1;">${nombre}</span>
+    </div>`;
+  }).join('');
+  return `
+    <div style="border:3px solid #000;border-radius:10px;margin:12px 0;padding:0 6px 6px;overflow:hidden;">
+      <div style="background:#000;color:#fff;font-size:15px;font-weight:900;letter-spacing:1px;margin:0 -6px 4px;padding:4px 0;">BEBESTIBLES · ENTREGAR</div>
+      <div style="font-size:14px;font-weight:900;margin:2px 0 2px;">N° ${escapeHtml(id)}</div>
+      ${lineas}
+      <div style="font-size:12px;font-weight:bold;margin-top:6px;">Marca ☐ al entregar cada uno</div>
+    </div>`;
+}
+function bloqueEntrega(cantidad, rangoTxt, conTitulo){
   const n = Number(cantidad)||0;
   const sets = Math.floor(n/6), sueltos = n%6;
-  const big = 'font-size:34px;font-weight:900;line-height:1.1;';
+  const big = 'font-size:24px;font-weight:900;line-height:1.1;';
   let lineas;
   if(sets>0 && sueltos===0){
     lineas = `<div style="${big}">${sets} ${sets===1?'SET':'SETS'}</div>
               <div style="${big}">= ${n} CARTONES</div>
               <div style="font-size:12px;margin-top:3px;">(1 set = 6 cartones)</div>`;
   } else if(sets>0){
-    lineas = `<div style="font-size:24px;font-weight:900;line-height:1.2;">${sets} ${sets===1?'SET':'SETS'} + ${sueltos} ${sueltos===1?'CARTÓN':'CARTONES'}</div>
+    lineas = `<div style="font-size:18px;font-weight:900;line-height:1.2;">${sets} ${sets===1?'SET':'SETS'} + ${sueltos} ${sueltos===1?'CARTÓN':'CARTONES'}</div>
               <div style="${big}">= ${n} CARTONES</div>
               <div style="font-size:12px;margin-top:3px;">(1 set = 6 cartones)</div>`;
   } else {
     lineas = `<div style="${big}">${n} ${n===1?'CARTÓN':'CARTONES'}</div>`;
   }
   return `
-    <div style="border:3px solid #000;border-radius:10px;margin:12px 0;padding:8px 6px;">
-      <div style="font-size:14px;font-weight:bold;letter-spacing:1px;margin-bottom:2px;">ENTREGAR</div>
+    <div style="border:3px solid #000;border-radius:10px;margin:12px 0;padding:0 6px 8px;overflow:hidden;">
+      ${conTitulo
+        ? `<div style="background:#000;color:#fff;font-size:15px;font-weight:900;letter-spacing:1px;margin:0 -6px 6px;padding:4px 0;">CARTONES · ENTREGAR</div>`
+        : `<div style="font-size:14px;font-weight:bold;letter-spacing:1px;margin:8px 0 2px;">ENTREGAR</div>`}
       ${lineas}
-      <div style="font-size:17px;font-weight:bold;margin-top:6px;border-top:2px dashed #000;padding-top:5px;">${rangoTxt}</div>
+      <div style="font-size:14px;font-weight:bold;margin-top:5px;border-top:2px dashed #000;padding-top:4px;">${rangoTxt}</div>
     </div>`;
 }
 function imprimirVoucher(p){
