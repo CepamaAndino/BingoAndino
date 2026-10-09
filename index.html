@@ -1839,18 +1839,20 @@ function imprimirVoucherId(id){ const p=purchasesCache.find(x=>x.id===id); if(p)
 function sendWhatsappId(id){ const p=purchasesCache.find(x=>x.id===id); if(p) sendWhatsapp(p); }
 // Bloque grande con la cantidad de cartones a entregar (para que se lea de un vistazo al entregar)
 function bloqueBebestibles(id, items){
-  const lineas = String(items||'').split(/,\s*/).filter(Boolean).map(it=>{
-    const m = it.match(/^(.*?)\s*x\s*(\d+)$/i);
-    const nombre = escapeHtml(m ? m[1].trim() : it), cant = m ? m[2] : '';
-    return `<div style="display:flex;gap:6px;align-items:flex-start;text-align:left;padding:3px 0;border-bottom:1px dashed #000;">
-      <span style="font-size:16px;line-height:1;">☐</span>
-      ${cant ? `<span style="font-size:18px;font-weight:900;line-height:1.1;min-width:26px;">${cant}×</span>` : ''}
-      <span style="font-size:13px;font-weight:800;line-height:1.2;flex:1;">${nombre}</span>
-    </div>`;
-  }).join('');
+  const txt = String(items||'');
+  // "Nombre xN, Nombre xN": el nombre puede traer comas (ej. "Botella 1,5 lts x2"), por eso se busca " xN" como cierre de cada ítem
+  let partes = [], mm, re = /(.+?)\s*x\s*(\d+)(?:,\s*|$)/gi;
+  while((mm = re.exec(txt)) !== null){ partes.push({nombre:mm[1].trim(), cant:mm[2]}); }
+  if(!partes.length) partes = txt.split(/,\s+/).filter(Boolean).map(n=>({nombre:n.trim(), cant:''}));
+  const lineas = partes.map(it=>`
+    <div style="display:flex;gap:6px;align-items:flex-start;text-align:left;padding:4px 0;border-bottom:2px dashed #000;">
+      <span style="font-size:18px;line-height:1;font-weight:900;">☐</span>
+      ${it.cant ? `<span style="font-size:20px;font-weight:900;line-height:1.05;min-width:30px;">${it.cant}×</span>` : ''}
+      <span style="font-size:14px;font-weight:900;line-height:1.2;flex:1;overflow-wrap:anywhere;">${escapeHtml(it.nombre)}</span>
+    </div>`).join('');
   return `
     <div style="border:3px solid #000;border-radius:10px;margin:12px 0;padding:0 6px 6px;overflow:hidden;">
-      <div style="background:#000;color:#fff;font-size:15px;font-weight:900;letter-spacing:1px;margin:0 -6px 4px;padding:4px 0;">BEBESTIBLES · ENTREGAR</div>
+      <div style="border-bottom:3px solid #000;margin:0 -6px 4px;padding:5px 0 3px;"><div style="font-size:11px;font-weight:900;letter-spacing:2px;">ENTREGAR</div><div style="font-size:19px;font-weight:900;letter-spacing:1px;line-height:1.1;">BEBESTIBLES</div></div>
       <div style="font-size:14px;font-weight:900;margin:2px 0 2px;">N° ${escapeHtml(id)}</div>
       ${lineas}
       <div style="font-size:12px;font-weight:bold;margin-top:6px;">Marca ☐ al entregar cada uno</div>
@@ -1875,7 +1877,7 @@ function bloqueEntrega(cantidad, rangoTxt, conTitulo){
   return `
     <div style="border:3px solid #000;border-radius:10px;margin:12px 0;padding:0 6px 8px;overflow:hidden;">
       ${conTitulo
-        ? `<div style="background:#000;color:#fff;font-size:15px;font-weight:900;letter-spacing:1px;margin:0 -6px 6px;padding:4px 0;">CARTONES · ENTREGAR</div>`
+        ? `<div style="border-bottom:3px solid #000;margin:0 -6px 6px;padding:5px 0 3px;"><div style="font-size:11px;font-weight:900;letter-spacing:2px;">ENTREGAR</div><div style="font-size:19px;font-weight:900;letter-spacing:1px;line-height:1.1;">CARTONES</div></div>`
         : `<div style="font-size:14px;font-weight:bold;letter-spacing:1px;margin:8px 0 2px;">ENTREGAR</div>`}
       ${lineas}
       <div style="font-size:14px;font-weight:bold;margin-top:5px;border-top:2px dashed #000;padding-top:4px;">${rangoTxt}</div>
