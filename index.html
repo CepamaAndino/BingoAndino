@@ -392,10 +392,13 @@
   select.estado-select{ font-size:12.5px; padding:6px 8px;}
 
   .print-only{ display:none; }
+  @page{ size:58mm auto; margin:2mm; }
   @media print{
-    body *{ visibility:hidden; }
-    .print-only, .print-only *{ visibility:visible; }
-    .print-only{ position:absolute; top:0; left:0; width:100%; display:block; }
+    html, body{ height:auto !important; min-height:0 !important; margin:0 !important; padding:0 !important; background:#fff !important; }
+    body > *:not(#voucherPrint){ display:none !important; }
+    .print-only{ display:block !important; position:static !important; width:100% !important; margin:0 !important; padding:0 !important; }
+    .print-only .voucher-box{ max-width:100% !important; width:100% !important; margin:0 !important; padding:4px !important; border:1px dashed #000 !important; box-sizing:border-box; zoom:.78; page-break-inside:avoid; break-inside:avoid; }
+    .print-only .voucher-box > :last-child{ margin-bottom:0 !important; }
   }
   .voucher-box{
     max-width:380px; margin:0 auto; padding:24px;
@@ -546,7 +549,6 @@
 .status-card{margin-top:12px;border:1.5px solid #e2d3b0;border-left:6px solid var(--dorado);border-radius:12px;background:#fff;padding:12px 14px;}
 .status-card.aceptada{border-left-color:var(--ok);}
 .status-card.rechazada{border-left-color:var(--rech);}
-.hero.compact img{max-height:120px;}
 @media(min-width:821px){.sticky-avisar{display:none!important;}}
 @media(max-width:820px){
   .flow-grid,.s3-grid{grid-template-columns:1fr;}
@@ -1005,7 +1007,6 @@ function setFlow(n, maxW){
   document.getElementById('flowPl').textContent = n===5 ? 'LISTO · COMPRA ENVIADA' : `PASO ${n} DE 4 · ${FLOW_LABELS[n]}`;
   document.getElementById('flowHead').style.maxWidth = maxW || '980px';
   document.body.classList.toggle('flow-pad', n<=2);
-  document.querySelector('.hero').classList.toggle('compact', n>=2);
 }
 function goStep(n){
   document.getElementById('step1').style.display = n===1 ? '' : 'none';
