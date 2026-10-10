@@ -550,6 +550,10 @@
 .status-card.aceptada{border-left-color:var(--ok);}
 .status-card.rechazada{border-left-color:var(--rech);}
 @media(min-width:821px){.sticky-avisar{display:none!important;}}
+.priv-box{margin-top:14px;background:#fffaf0;border:1.5px solid #e2d3b0;border-radius:12px;padding:12px 14px;font-size:13px;color:#5a4d36;}
+.priv-box p{margin:6px 0;line-height:1.4;}
+.priv-box a{color:var(--turquesa);font-weight:700;}
+.priv-box .recordar{color:var(--tinta);}
 @media(max-width:820px){
   .flow-grid,.s3-grid{grid-template-columns:1fr;}
   .s3-right{order:-1;}
@@ -670,8 +674,14 @@
                     <div class="phone-row"><span class="prefix">+56</span><input type="text" id="whatsapp" inputmode="numeric" maxlength="9" placeholder="9 dígitos, sin espacios" required></div>
                   </div>
                 </div>
-                <label class="recordar"><input type="checkbox" id="recordarDatos" checked> Recordar mis datos en este equipo</label>
                 <p class="note">Al continuar reservamos tus cartones. Luego te mostramos cómo pagar.</p>
+                <div class="priv-box">
+                  <b>🔒 Protección de datos</b>
+                  <p>Solicitamos el nombre del apoderado, correo electrónico, WhatsApp y nombre y curso del alumno/a para gestionar la compra y entrega de cartones del Bingo Andino.</p>
+                  <p>No se utilizarán para publicidad ni se compartirán con otros participantes. Se eliminan cuando termina el bingo.</p>
+                  <p>Para contactarnos escribe a <a href="mailto:cepama.andino.montessori@gmail.com">cepama.andino.montessori@gmail.com</a>.</p>
+                  <label class="recordar" style="margin-top:10px;"><input type="checkbox" id="aceptoDatos" required> Estoy de acuerdo con el uso de mis datos</label>
+                </div>
                 <div class="err" id="formErr"></div>
               </div>
             </div>
@@ -1048,11 +1058,7 @@ const LS_DATOS='bingoDatosComprador';
 function lsGet(k){ try{ return JSON.parse(localStorage.getItem(k)||'null'); }catch(e){ return null; } }
 function lsSet(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
-(function prefill(){
-  const d=lsGet(LS_DATOS); if(!d) return;
-  ['nombreComprador','email','nombreAlumno','curso','whatsapp'].forEach(id=>{ if(d[id]) document.getElementById(id).value=d[id]; });
-  marcarValidos();
-})();
+lsDel(LS_DATOS); // ya no se guardan datos en el navegador: se limpia lo que pudiera haber quedado de antes
 
 async function loadModoYDisponibilidad(){
   try{
@@ -1084,6 +1090,7 @@ document.getElementById('purchaseForm').addEventListener('submit', async (e)=>{
     whatsapp: whatsappInput.value.trim(),
     sets: setsInput.value
   };
+  if(!document.getElementById('aceptoDatos').checked){ errBox.textContent='Marca la casilla de acuerdo con el uso de tus datos para continuar.'; return; }
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email)){
     errBox.textContent = 'Ingresa un email válido.';
     return;
@@ -1099,9 +1106,6 @@ document.getElementById('purchaseForm').addEventListener('submit', async (e)=>{
   try{
     const r = await callBackend('createReservation', payload);
     lastPurchase = Object.assign({}, payload, r);
-    if(document.getElementById('recordarDatos').checked){
-      lsSet(LS_DATOS,{nombreComprador:payload.nombreComprador,email:payload.email,nombreAlumno:payload.nombreAlumno,curso:payload.curso,whatsapp:payload.whatsapp});
-    } else { lsDel(LS_DATOS); }
     showConfirmation(lastPurchase);
     document.getElementById('flowWrap').style.display='none';
     loadModoYDisponibilidad();
