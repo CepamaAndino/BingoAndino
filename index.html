@@ -357,6 +357,7 @@
   .hist-row .ib{ width:32px; height:32px; border-radius:8px; border:1.5px solid #d9c9a0; background:#fff; cursor:pointer; font-size:14px; padding:0; }
   .hist-row select.mas{ width:46px; height:32px; border-radius:8px; border:1.5px solid #d9c9a0; background:#fff; font-weight:900; font-size:15px; cursor:pointer; padding:0 0 0 10px; }
   .tag-caja{ font-size:10px; font-weight:800; background:#e6e9f5; color:var(--turquesa); border-radius:99px; padding:1px 6px; margin-left:4px; }
+  .tag-dele{ background:#e4ecf7; color:#3a6fb0; }
   @media (max-width:760px){
     .hist-head{ display:none; }
     .hist-row{ grid-template-columns:1fr 1fr; row-gap:6px; column-gap:10px; }
@@ -1516,7 +1517,7 @@ function renderTable(){
   document.getElementById('histList').innerHTML = hist.length ? hist.map(p=>`
     <div class="hist-row">
       <b>${p.id}</b>
-      <span class="t"><b>${escapeHtml(p.comprador||'—')}</b>${p.modo==='presencial' ? '<span class="tag-caja">caja</span>' : ''}<small>${escapeHtml(p.email||'—')}</small></span>
+      <span class="t"><b>${escapeHtml(p.comprador||'—')}</b>${p.modo==='presencial' ? '<span class="tag-caja">caja</span>' : ''}${p.modo==='delegada' ? '<span class="tag-caja tag-dele">delegada</span>' : ''}<small>${escapeHtml(p.modo==='delegada' ? (p.metodoPago||'pago a delegada') : (p.email||'—'))}</small></span>
       <span class="t">${escapeHtml(p.alumno||'—')}<small>${escapeHtml(p.curso||'')}</small></span>
       <span class="t">${rango(p)}<small>${p.sets ? p.sets+' sets' : p.cantidad+' cartones'}</small></span>
       <b>${monto(p)}</b>
