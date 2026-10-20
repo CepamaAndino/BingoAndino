@@ -664,7 +664,7 @@ body.modo-estado #dispCounter, body.modo-estado #flowHead, body.modo-estado #flo
                 <label style="margin-top:16px;">O elige otra cantidad de sets (cada set = 6 cartones)</label>
                 <div class="sets-step">
                   <button type="button" id="setsMinus" aria-label="Menos sets">−</button>
-                  <div><input type="number" id="sets" min="1" max="10" value="1" inputmode="numeric"><small id="setsCartones">6 cartones</small></div>
+                  <div><input type="number" id="sets" min="1" max="10" value="2" inputmode="numeric"><small id="setsCartones">6 cartones</small></div>
                   <button type="button" id="setsPlus" aria-label="Más sets">＋</button>
                 </div>
                 <div class="price-box" id="priceBox">Calculando precio...</div>
@@ -1001,7 +1001,7 @@ function syncTiles(){
 document.querySelectorAll('#preciosInfo .price-tile').forEach(t=>{
   t.addEventListener('click', ()=>{
     if(t.dataset.modo !== currentModo) return;
-    setsInput.value = t.dataset.sets;
+    setsInput.value = t.dataset.sets; setsTocado = true;
     updatePriceDisplay();
   });
 });
@@ -1014,6 +1014,8 @@ function updatePriceDisplay(){
   const modoTxt = currentModo === 'evento' ? '🎪 Precio día del evento' : '🎫 Precio preventa';
   priceBox.innerHTML = `${modoTxt}<br>${sets} set(s) = ${cartones} cartones → <b>$${monto.toLocaleString('es-CL')}</b>`;
 }
+let setsTocado = false;
+setsInput.addEventListener('input', ()=>{ setsTocado = true; });
 setsInput.addEventListener('input', updatePriceDisplay);
 
 function packNombre(sets){
@@ -1034,7 +1036,7 @@ function updateSummary(sets,cartones,monto){
 }
 function stepSets(d){
   const cur = parseInt(setsInput.value,10) || 1;
-  setsInput.value = Math.min(10, Math.max(1, cur+d));
+  setsInput.value = Math.min(10, Math.max(1, cur+d)); setsTocado = true;
   updatePriceDisplay();
 }
 document.getElementById('setsMinus').addEventListener('click',()=>stepSets(-1));
@@ -1100,6 +1102,8 @@ async function loadModoYDisponibilidad(){
   try{
     const m = await callBackend('getModo', {});
     currentModo = m.modo;
+    // El Pack Familia (2 sets) solo existe en preventa: el día del evento se parte con 1 set
+    if(currentModo==='evento' && !setsTocado) setsInput.value = 1;
   }catch(err){ /* si falla, se queda en preventa por defecto */ }
   updatePriceDisplay();
   try{
