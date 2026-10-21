@@ -1691,7 +1691,29 @@ function imprimirListadoEntrega(){
     });
   });
   document.getElementById('entregaPrintContent').innerHTML = html;
-  window.print();
+
+  // El CSS de impresión normal está pensado para el voucher (ticket angosto de 58mm)
+  // y oculta todo lo que no sea #voucherPrint. Para el listado necesitamos una hoja
+  // normal mostrando #entregaPrint, así que sobreescribimos esas reglas solo mientras
+  // se imprime este listado, y las quitamos apenas termina.
+  const overrideStyle = document.createElement('style');
+  overrideStyle.id = 'entregaPrintOverride';
+  overrideStyle.textContent = `
+    @media print{
+      @page{ size:auto; margin:10mm; }
+      body > *:not(#entregaPrint){ display:none !important; }
+      #entregaPrint{ display:block !important; }
+      #voucherPrint{ display:none !important; }
+    }
+  `;
+  document.head.appendChild(overrideStyle);
+  const limpiarOverride = ()=>{
+    const el = document.getElementById('entregaPrintOverride');
+    if(el) el.remove();
+    window.removeEventListener('afterprint', limpiarOverride);
+  };
+  window.addEventListener('afterprint', limpiarOverride);
+  setTimeout(()=>{ window.print(); }, 50);
 }
 
 async function avisoIdNoEncontrado(){
