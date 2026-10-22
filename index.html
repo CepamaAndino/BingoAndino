@@ -668,7 +668,7 @@ body.modo-estado #dispCounter, body.modo-estado #flowHead, body.modo-estado #flo
                   <button type="button" id="setsPlus" aria-label="Más sets">＋</button>
                 </div>
                 <div class="price-box" id="priceBox">Calculando precio...</div>
-                <p class="note" style="margin-top:8px;">3 o más sets: $12.000 + $9.000 por cada set extra</p>
+                <p class="note" style="margin-top:8px;">Más de 2 sets en preventa (hasta el 30 de octubre): cada 2 sets $12.000 y el set suelto $9.000. Ej: 3 sets = $21.000 · 4 sets = $24.000</p>
                 <div class="err" id="step1Err"></div>
               </div>
             </div>
@@ -990,7 +990,8 @@ function calcularPrecioLocal(modo, sets){
   }
   if(sets === 1) return { cartones, monto: 9000 };
   if(sets === 2) return { cartones, monto: 12000 };
-  return { cartones, monto: 12000 + (sets-2)*9000 };
+  // 3+ sets: cada 2 sets = $12.000 (pack familia) y el set suelto $9.000 (3 sets = $21.000, 4 = $24.000)
+  return { cartones, monto: Math.floor(sets/2)*12000 + (sets%2)*9000 };
 }
 
 // Marca la tarjeta elegida. Solo se pueden elegir las del modo de venta vigente (preventa o día del evento).
