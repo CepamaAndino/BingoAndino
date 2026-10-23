@@ -1519,6 +1519,7 @@ function renderTable(){
       <div class="acts">
         <button type="button" class="btn-aceptar" onclick="cambiarEstado('${p.id}','aceptada',this)">✓ Aceptar</button>
         <button type="button" class="btn-rechazar" onclick="cambiarEstado('${p.id}','rechazada',this)">✕ Rechazar</button>
+        <button type="button" class="ib" style="width:42px;border-radius:10px;border:1.5px solid #d9c9a0;background:#fff;cursor:pointer;" title="Modificar sets" onclick="modificarSetsUI('${p.id}')">✏️</button>
         <button type="button" class="ib" style="width:42px;border-radius:10px;border:1.5px solid #d9c9a0;background:#fff;cursor:pointer;" title="Eliminar" onclick="deleteOne('${p.id}')">🗑️</button>
       </div>
       ${p.whatsapp ? `<button type="button" class="btn-recordar" onclick="sendRecordatorioPago('${p.id}')">💬 Recordar pago por WhatsApp</button>` : ''}
@@ -1543,6 +1544,7 @@ function renderTable(){
           ${p.estado!=='aceptada' ? '<option value="aceptada">✓ Pasar a Aceptada</option>' : ''}
           ${p.estado!=='pendiente' ? '<option value="pendiente">⏳ Pasar a Pendiente</option>' : ''}
           ${p.estado!=='rechazada' ? '<option value="rechazada">✕ Pasar a Rechazada</option>' : ''}
+          <option value="editar">✏️ Modificar sets</option>
           <option value="eliminar">🗑️ Eliminar</option>
         </select>
       </span>
@@ -1553,7 +1555,32 @@ function accionFila(id, sel){
   const v = sel.value; sel.value = '';
   if(!v) return;
   if(v==='eliminar') return deleteOne(id);
+  if(v==='editar') return modificarSetsUI(id);
   return cambiarEstado(id, v, null);
+}
+// Modifica los sets de una compra: pide la cantidad nueva y el monto (sugerido según precio preventa/evento)
+async function modificarSetsUI(id){
+  const p = purchasesCache.find(x=>x.id===id);
+  if(!p) return;
+  const actual = Number(p.sets) || Math.round(Number(p.cantidad)/6);
+  const r1 = prompt('Compra '+id+' ('+(p.comprador||'—')+')\nSets actuales: '+actual+' ('+p.cantidad+' cartones)\n\n¿Cuántos sets debe tener ahora?', actual);
+  if(r1===null) return;
+  const sets = parseInt(r1,10);
+  if(!sets || sets<1){ alert('Cantidad de sets inválida.'); return; }
+  if(sets===actual && !confirm('Es la misma cantidad de sets. ¿Quieres cambiar solo el monto?')) return;
+  const sugerido = calcularPrecioLocal(p.modo==='evento' ? 'evento' : 'preventa', sets).monto;
+  const r2 = prompt('Monto total para '+sets+' set(s) ('+(sets*6)+' cartones).\nSugerido: $'+sugerido.toLocaleString('es-CL')+'\n\nDeja el número o cámbialo:', sugerido);
+  if(r2===null) return;
+  const monto = parseInt(String(r2).replace(/\D/g,''),10);
+  if(isNaN(monto) || monto<0){ alert('Monto inválido.'); return; }
+  try{
+    const r = await callBackend('modificarSets', {id, sets, monto, password: adminPassword});
+    await loadPurchases();
+    alert('Listo: '+id+' ahora tiene '+r.sets+' sets ('+r.cantidad+' cartones, BA-'+pad(r.desde)+' a BA-'+pad(r.hasta)+') por $'+Number(r.monto).toLocaleString('es-CL')+'.');
+  }catch(err){
+    if(/ID no encontrado/.test(err.message)){ await avisoIdNoEncontrado(); return; }
+    alert('No se pudo modificar: '+err.message);
+  }
 }
 async function cambiarEstado(id, estado, btn){
   if(estado==='rechazada' && !confirm('¿Rechazar la compra '+id+'? Sus cartones vuelven a quedar disponibles para vender.')) return;
