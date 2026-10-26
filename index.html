@@ -849,7 +849,7 @@ body.modo-estado #dispCounter, body.modo-estado #flowHead, body.modo-estado #flo
         <div class="stat"><div class="n" id="statVendidos">0</div><div class="l">Cartones vendidos</div></div>
         <div class="stat"><div class="n" id="statDisponibles">0</div><div class="l">Cartones disponibles</div></div>
         <div class="stat"><div class="n" id="statPendientes">0</div><div class="l">Pendientes por revisar</div></div>
-        <div class="stat"><div class="n" id="statEntregadas">0</div><div class="l">Compras entregadas</div></div>
+        <div class="stat"><div class="n" id="statEntregadas">0</div><div class="l">Cartones entregados</div><div class="l" id="statEntregadasCompras" style="font-size:11px; opacity:.75;"></div></div>
       </div>
 
       <div class="toolbar">
@@ -1478,7 +1478,10 @@ function updateStats(r){
   document.getElementById('statVendidos').textContent = vendidos;
   document.getElementById('statDisponibles').textContent = r.disponibles;
   document.getElementById('statPendientes').textContent = pendientes;
-  document.getElementById('statEntregadas').textContent = aceptadas.filter(esEntregado).length + ' / ' + aceptadas.length;
+  const entPs = aceptadas.filter(esEntregado);
+  const cartEnt = entPs.reduce((t,p)=>t+Number(p.cantidad),0);
+  document.getElementById('statEntregadas').textContent = cartEnt.toLocaleString('es-CL') + ' / ' + vendidos.toLocaleString('es-CL');
+  document.getElementById('statEntregadasCompras').textContent = entPs.length + ' de ' + aceptadas.length + ' compras';
   document.getElementById('statBebestibles').textContent = '$'+recaudadoBebestibles.toLocaleString('es-CL');
   document.getElementById('statTotalGeneral').textContent = '$'+(recaudado+recaudadoBebestibles).toLocaleString('es-CL');
 }
