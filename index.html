@@ -351,6 +351,8 @@
   .hist-head{ background:var(--turquesa-dark); color:#fff; font-size:11px; font-weight:800; text-transform:uppercase; position:sticky; top:0; z-index:2; }
   .hist-row{ border-bottom:1px solid #f0e6cc; font-size:13px; }
   .hist-row:last-child{ border-bottom:none; }
+  .hist-row.entregada{ background:#e4f5e8; box-shadow:inset 4px 0 0 #2e9e5b; }
+  .hist-row.entregada .t b{ color:#1f6b3d; }
   .hist-row small{ display:block; color:#7a6a4f; font-size:11.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .hist-row .t{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .hist-row .acc{ display:flex; gap:5px; justify-content:flex-end; align-items:center; }
@@ -847,12 +849,15 @@ body.modo-estado #dispCounter, body.modo-estado #flowHead, body.modo-estado #flo
         <div class="stat"><div class="n" id="statVendidos">0</div><div class="l">Cartones vendidos</div></div>
         <div class="stat"><div class="n" id="statDisponibles">0</div><div class="l">Cartones disponibles</div></div>
         <div class="stat"><div class="n" id="statPendientes">0</div><div class="l">Pendientes por revisar</div></div>
+        <div class="stat"><div class="n" id="statEntregadas">0</div><div class="l">Compras entregadas</div></div>
       </div>
 
       <div class="toolbar">
         <button class="filter-chip active" data-estado="todas">Todas</button>
         <button class="filter-chip" data-estado="pendiente">Pendientes</button>
         <button class="filter-chip" data-estado="aceptada">Aceptadas</button>
+        <button class="filter-chip" data-estado="porentregar">Por entregar</button>
+        <button class="filter-chip" data-estado="entregada">Entregadas</button>
         <button class="filter-chip" data-estado="rechazada">Rechazadas</button>
         <input type="text" id="searchBox" placeholder="Buscar comprador, alumno o curso...">
         <button class="btn btn-secondary btn-sm" onclick="loadPurchases()">🔄 Actualizar</button>
@@ -912,6 +917,8 @@ const ADMIN_WHATSAPP = '56969159984';
 
 let purchasesCache = [];
 let currentFilter = 'todas';
+// Una compra cuenta como entregada si se marcó el check o si fue venta presencial (caja): ahí se entrega en el momento.
+const esEntregado = p => !!p.entregado || p.modo==='presencial';
 let lastPurchase = null;
 
 /* ============ NAVEGACIÓN ============ */
@@ -1471,6 +1478,7 @@ function updateStats(r){
   document.getElementById('statVendidos').textContent = vendidos;
   document.getElementById('statDisponibles').textContent = r.disponibles;
   document.getElementById('statPendientes').textContent = pendientes;
+  document.getElementById('statEntregadas').textContent = aceptadas.filter(esEntregado).length + ' / ' + aceptadas.length;
   document.getElementById('statBebestibles').textContent = '$'+recaudadoBebestibles.toLocaleString('es-CL');
   document.getElementById('statTotalGeneral').textContent = '$'+(recaudado+recaudadoBebestibles).toLocaleString('es-CL');
 }
@@ -1491,12 +1499,24 @@ function renderTable(){
   const ordenadas = purchasesCache.filter(p=> !q || filtroTxt(p))
     .sort((a,b)=> new Date(b.fecha) - new Date(a.fecha));
   const pend = ordenadas.filter(p=>p.estado==='pendiente');
-  const hist = ordenadas.filter(p=>p.estado!=='pendiente' && (currentFilter==='todas' || currentFilter===p.estado));
+  const hist = ordenadas.filter(p=>{
+    if(p.estado==='pendiente') return false;
+    if(currentFilter==='todas') return true;
+    if(currentFilter==='entregada') return p.estado==='aceptada' && esEntregado(p);
+    if(currentFilter==='porentregar') return p.estado==='aceptada' && !esEntregado(p);
+    return currentFilter===p.estado;
+  });
   const totalPend = purchasesCache.filter(p=>p.estado==='pendiente').length;
 
   // etiqueta con el número de pendientes en el filtro
   const chipPend = document.querySelector('.filter-chip[data-estado="pendiente"]');
   if(chipPend) chipPend.textContent = 'Pendientes' + (totalPend ? ' ('+totalPend+')' : '');
+  const acepts = purchasesCache.filter(p=>p.estado==='aceptada');
+  const nEnt = acepts.filter(esEntregado).length;
+  const chipEnt = document.querySelector('.filter-chip[data-estado="entregada"]');
+  if(chipEnt) chipEnt.textContent = 'Entregadas (' + nEnt + ')';
+  const chipPor = document.querySelector('.filter-chip[data-estado="porentregar"]');
+  if(chipPor) chipPor.textContent = 'Por entregar (' + (acepts.length - nEnt) + ')';
 
   const verPend = currentFilter==='todas' || currentFilter==='pendiente';
   const verHist = currentFilter!=='pendiente';
@@ -1528,14 +1548,16 @@ function renderTable(){
 
   // ----- historial compacto -----
   document.getElementById('histList').innerHTML = hist.length ? hist.map(p=>`
-    <div class="hist-row">
+    <div class="hist-row${p.estado==='aceptada' && esEntregado(p) ? ' entregada' : ''}">
       <b>${p.id}</b>
       <span class="t"><b>${escapeHtml(p.comprador||'—')}</b>${p.modo==='presencial' ? '<span class="tag-caja">caja</span>' : ''}${p.modo==='delegada' ? '<span class="tag-caja tag-dele">delegada</span>' : ''}<small>${escapeHtml(p.modo==='delegada' ? (p.metodoPago||'pago a delegada') : (p.email||'—'))}</small></span>
       <span class="t">${escapeHtml(p.alumno||'—')}<small>${escapeHtml(p.curso||'')}</small></span>
       <span class="t">${rango(p)}<small>${p.sets ? p.sets+' sets' : p.cantidad+' cartones'}</small></span>
       <b>${monto(p)}</b>
       <span><span class="badge ${p.estado}">${p.estado}</span></span>
-      <span style="text-align:center;">${p.estado==='aceptada' ? `<input type="checkbox" ${p.entregado?'checked':''} onchange="toggleEntregado('${p.id}', this.checked)" style="width:18px; height:18px; cursor:pointer;" title="Marcar como entregado">` : ''}</span>
+      <span style="text-align:center;">${p.estado==='aceptada' ? (p.modo==='presencial'
+        ? `<input type="checkbox" checked disabled style="width:18px; height:18px;" title="Venta en caja: entregada en el momento">`
+        : `<input type="checkbox" ${p.entregado?'checked':''} onchange="toggleEntregado('${p.id}', this.checked, this)" style="width:18px; height:18px; cursor:pointer;" title="${p.entregado?'Entregado (pide confirmación para desmarcar)':'Marcar como entregado'}">`) : ''}</span>
       <span class="acc">
         ${p.estado==='aceptada' ? `<button type="button" class="ib" title="Voucher" onclick="imprimirVoucherId('${p.id}')">🖨️</button>` : ''}
         ${(p.estado==='aceptada' && p.whatsapp) ? `<button type="button" class="ib" title="WhatsApp" onclick="sendWhatsappId('${p.id}')">💬</button>` : ''}
@@ -1612,11 +1634,17 @@ function agruparPorTallerCurso(lista){
   return grupos;
 }
 
-async function toggleEntregado(id, checked){
+async function toggleEntregado(id, checked, box){
   const p = purchasesCache.find(x=>x.id===id);
+  if(p && p.modo==='presencial'){ renderTable(); return; }
+  if(!checked && !confirm('¿Quitar la marca de ENTREGADO a '+id+'?\n\nSolo hazlo si la marcaste por error.')){
+    if(box) box.checked = true;
+    return;
+  }
   try{
     await callBackend('marcarEntregado', {password: adminPassword, id: id, entregado: checked});
     if(p) p.entregado = checked;
+    renderTable();
   }catch(err){
     alert('Error al guardar: '+err.message);
     renderTable();
@@ -1629,7 +1657,10 @@ function imprimirListadoEntrega(){
   const q = (document.getElementById('searchBox').value||'').toLowerCase();
   const filtroTxt = c => (c.comprador+' '+c.alumno+' '+c.curso).toLowerCase().includes(q);
   let filtradas = purchasesCache.filter(p=>p.estado==='aceptada' && (!q || filtroTxt(p)));
-  if(filtradas.length===0){ alert('No hay cartones aceptados para imprimir (revisa el buscador de arriba).'); return; }
+  // respeta los botones "Por entregar" / "Entregadas"
+  if(currentFilter==='porentregar') filtradas = filtradas.filter(p=>!esEntregado(p));
+  if(currentFilter==='entregada') filtradas = filtradas.filter(esEntregado);
+  if(filtradas.length===0){ alert('No hay cartones para imprimir con este filtro (revisa los botones y el buscador de arriba).'); return; }
   const grupos = agruparPorTallerCurso(filtradas);
   let html = `<h1 style="font-family:'Bebas Neue',sans-serif; letter-spacing:1px; margin-bottom:4px;">BINGO ANDINO 2026 — Listado de entrega de cartones</h1>
     <p style="margin:0 0 16px; font-size:13px;">Generado: ${new Date().toLocaleString('es-CL')}${q ? ' · filtro: "'+escapeHtml(q)+'"' : ''}</p>`;
@@ -1651,7 +1682,7 @@ function imprimirListadoEntrega(){
       grupos[t][curso].sort((a,b)=>String(a.alumno).localeCompare(String(b.alumno))).forEach(p=>{
         const rangeTxt = p.desde===p.hasta ? ('BA-'+pad(p.desde)) : ('BA-'+pad(p.desde)+' a '+pad(p.hasta));
         html += `<tr>
-          <td style="border:1px solid #999; padding:4px; text-align:center; font-size:16px;">${p.entregado?'☑':'☐'}</td>
+          <td style="border:1px solid #999; padding:4px; text-align:center; font-size:16px;">${esEntregado(p)?'☑':'☐'}</td>
           <td style="border:1px solid #999; padding:4px; font-size:12px;">${escapeHtml(p.id||'—')}</td>
           <td style="border:1px solid #999; padding:4px; font-size:12px;">${escapeHtml(p.alumno||'—')}</td>
           <td style="border:1px solid #999; padding:4px; font-size:12px;">${escapeHtml(p.comprador||'—')}</td>
@@ -2201,7 +2232,7 @@ function exportExcel(){
     ID:p.id, Fecha:new Date(p.fecha).toLocaleString('es-CL'), Comprador:p.comprador, Email:p.email||'',
     Alumno:p.alumno, Curso:p.curso, Taller:p.taller||'', WhatsApp: p.whatsapp ? ('+56'+p.whatsapp) : '', Modo:p.modo||'', Sets:p.sets||'',
     Cantidad:p.cantidad, CartonDesde:'BA-'+pad(p.desde), CartonHasta:'BA-'+pad(p.hasta), Monto:p.monto, Estado:p.estado, MetodoPago:p.metodoPago||'',
-    Entregado: p.estado==='aceptada' ? (p.entregado ? 'Sí' : 'No') : ''
+    Entregado: p.estado==='aceptada' ? (esEntregado(p) ? 'Sí' : 'No') : ''
   }));
   const dataBebestibles = bebestiblesVentasCache.map(b=>({
     ID:b.id, Fecha:new Date(b.fecha).toLocaleString('es-CL'), Comprador:b.comprador,
