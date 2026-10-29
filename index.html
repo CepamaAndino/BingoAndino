@@ -249,6 +249,22 @@
   .prod-edit-row input[type=number]{ flex:1; padding:6px 8px; font-size:13px; }
 
 
+
+  /* ===== KIOSCO (pedidos de la pantalla touch) ===== */
+  .kk-chips{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
+  .kk-chips button{ padding:7px 14px; border-radius:99px; border:1.5px solid #e2d3b0; background:#fff; font-weight:800; font-size:13px; cursor:pointer; }
+  .kk-chips button.on{ background:#1c2550; color:#fff; border-color:#1c2550; }
+  .kk-row{ display:flex; align-items:center; gap:12px; border:2px solid #e2d3b0; border-radius:14px; padding:10px 14px; margin-bottom:8px; flex-wrap:wrap; }
+  .kk-row.pend{ background:#fff8e6; border-color:#ffd35c; }
+  .kk-row.ent{ background:#eaf7ee; border-color:#9fd6b0; }
+  .kk-cod{ font-size:24px; font-weight:900; min-width:92px; }
+  .kk-det{ flex:1; min-width:200px; font-size:14px; line-height:1.4; }
+  .kk-det small{ color:#6b6540; }
+  .kk-monto{ font-size:22px; font-weight:900; min-width:90px; text-align:right; }
+  .kk-acc{ display:flex; gap:6px; flex-wrap:wrap; }
+  .kk-acc button{ padding:9px 12px; border-radius:10px; border:0; font-weight:800; font-size:13px; color:#fff; cursor:pointer; background:#8a8a8a; }
+  .kk-acc .v{ background:#2e9e5b; } .kk-acc .r{ background:#b3141f; } .kk-acc .b{ background:#1c2550; }
+  .kk-tag{ font-size:11px; font-weight:800; border-radius:99px; padding:2px 9px; margin-right:6px; }
   /* ===== CAJA (venta presencial) ===== */
   .caja-head{ display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
   .caja-head h2{ margin:0; font-size:20px; }
@@ -767,6 +783,19 @@ body.modo-estado #dispCounter, body.modo-estado #flowHead, body.modo-estado #flo
       <div class="modo-switch">
         <div>Modo de venta actual: <span class="badge pendiente" id="modoBadge">—</span></div>
         <button class="btn btn-secondary btn-sm" id="modoToggleBtn" onclick="toggleModo()">Cambiar modo</button>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+          <h2 style="font-size:18px; margin:0;">📲 Pedidos del kiosco <small id="kkBadge" class="badge pendiente" style="display:none;"></small></h2>
+          <div style="display:flex; gap:8px;">
+            <a class="btn btn-secondary btn-sm" href="kiosco.html" target="_blank" rel="noopener">Abrir pantalla del cliente ↗</a>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="kioscoLoad()">🔄</button>
+          </div>
+        </div>
+        <input type="text" id="kkBuscar" placeholder="🔎 Buscar código (ej: K-0007 o solo 7)" oninput="kioscoRender()" style="margin-top:10px; max-width:380px;">
+        <div class="kk-chips" id="kkChips"></div>
+        <div id="kkList"><p class="note">Cargando pedidos...</p></div>
       </div>
 
       <div class="card" style="margin-bottom:16px;">
@@ -1412,6 +1441,7 @@ async function adminLogin(){
     loadPurchases();
     loadModoAdmin();
     loadProductosAdmin();
+    kioscoLoad();
   }catch(err){
     errBox.textContent = err.message;
   }
@@ -1553,7 +1583,7 @@ function renderTable(){
   document.getElementById('histList').innerHTML = hist.length ? hist.map(p=>`
     <div class="hist-row${p.estado==='aceptada' && esEntregado(p) ? ' entregada' : ''}">
       <b>${p.id}</b>
-      <span class="t"><b>${escapeHtml(p.comprador||'—')}</b>${p.modo==='presencial' ? '<span class="tag-caja">caja</span>' : ''}${p.modo==='delegada' ? '<span class="tag-caja tag-dele">delegada</span>' : ''}<small>${escapeHtml(p.modo==='delegada' ? (p.metodoPago||'pago a delegada') : (p.email||'—'))}</small></span>
+      <span class="t"><b>${escapeHtml(p.comprador||'—')}</b>${p.modo==='presencial' ? '<span class="tag-caja">caja</span>' : ''}${p.modo==='kiosco' ? '<span class="tag-caja">kiosco</span>' : ''}${p.modo==='delegada' ? '<span class="tag-caja tag-dele">delegada</span>' : ''}<small>${escapeHtml(p.modo==='delegada' ? (p.metodoPago||'pago a delegada') : (p.email||'—'))}</small></span>
       <span class="t">${escapeHtml(p.alumno||'—')}<small>${escapeHtml(p.curso||'')}</small></span>
       <span class="t">${rango(p)}<small>${p.sets ? p.sets+' sets' : p.cantidad+' cartones'}</small></span>
       <b>${monto(p)}</b>
@@ -1753,6 +1783,91 @@ async function loadProductosAdmin(){
   }catch(err){ /* silencioso */ }
 }
 
+/* ============ KIOSCO: PEDIDOS DE LA PANTALLA TOUCH ============ */
+let kioscoRows = [], kioscoFiltro = 'cobrar';
+async function kioscoLoad(){
+  try{
+    const r = await callBackend('kioscoListar', {password: adminPassword});
+    kioscoRows = r.rows || [];
+    kioscoRender();
+  }catch(err){
+    document.getElementById('kkList').innerHTML = '<p class="note">No se pudieron cargar los pedidos del kiosco ('+escapeHtml(err.message)+'). Si es la primera vez, falta actualizar el Code.gs en Apps Script.</p>';
+  }
+}
+function kioscoSetFiltro(f){ kioscoFiltro = f; kioscoRender(); }
+function kioscoRender(){
+  const buscar = (document.getElementById('kkBuscar').value||'').trim().toUpperCase().replace(/^K-?/,'');
+  const cobrar = kioscoRows.filter(r=>r.estado==='pendiente');
+  const entregar = kioscoRows.filter(r=>r.estado==='pagado');
+  const hechos = kioscoRows.filter(r=>r.estado==='entregado');
+  const badge = document.getElementById('kkBadge');
+  badge.style.display = cobrar.length ? '' : 'none';
+  badge.textContent = cobrar.length+' por cobrar';
+  const chips = [['cobrar','⏳ Por cobrar',cobrar.length],['entregar','💳 Por entregar',entregar.length],['entregado','✔ Entregados',hechos.length],['todos','Todos',kioscoRows.length]];
+  document.getElementById('kkChips').innerHTML = chips.map(c=>`<button type="button" class="${kioscoFiltro===c[0]?'on':''}" onclick="kioscoSetFiltro('${c[0]}')">${c[1]} (${c[2]})</button>`).join('');
+  let lista = kioscoRows;
+  if(buscar) lista = lista.filter(r=>String(r.id).toUpperCase().replace('K-','').replace(/^0+/,'').includes(buscar.replace(/^0+/,'')) );
+  else if(kioscoFiltro==='cobrar') lista = cobrar;
+  else if(kioscoFiltro==='entregar') lista = entregar;
+  else if(kioscoFiltro==='entregado') lista = hechos;
+  lista = lista.filter(r=>r.estado!=='anulado' || kioscoFiltro==='todos' || buscar);
+  document.getElementById('kkList').innerHTML = lista.length ? lista.map(kioscoFila).join('')
+    : '<p class="note">'+(buscar ? 'No hay pedidos con ese código.' : 'Nada por aquí por ahora. 🎉')+'</p>';
+}
+function kioscoFila(r){
+  const hora = new Date(r.fecha).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+  const elegido = r.metodo==='efectivo' ? '💵 quiere pagar en efectivo' : '🏦 va a transferir';
+  let tag='', acc='', cls='';
+  if(r.estado==='pendiente'){
+    cls='pend'; tag=`<span class="kk-tag" style="background:#ffd35c;">⏳ Esperando pago</span>`;
+    const t = r.metodo!=='efectivo';
+    acc = `<button class="${t?'v':''}" onclick="kioscoConfirmar('${r.id}','transferencia')">🏦 Transferencia recibida + imprimir</button>
+           <button class="${t?'':'v'}" onclick="kioscoConfirmar('${r.id}','efectivo')">💵 Pagó efectivo + imprimir</button>
+           <button class="r" onclick="kioscoAnular('${r.id}')">✖ Anular</button>`;
+  } else if(r.estado==='pagado'){
+    tag=`<span class="kk-tag" style="background:#cfd8ff;">💳 Pagado · por entregar</span>`;
+    acc = `<button class="b" onclick="kioscoReimprimir('${r.id}')">🖨️ Reimprimir</button><button class="v" onclick="kioscoEntregar('${r.id}',true)">📦 Marcar entregado</button>`;
+  } else if(r.estado==='entregado'){
+    cls='ent'; tag=`<span class="kk-tag" style="background:#9fd6b0;">✔ Entregado</span>`;
+    acc = `<button class="b" onclick="kioscoReimprimir('${r.id}')">🖨️</button><button onclick="kioscoEntregar('${r.id}',false)">↩ Deshacer</button>`;
+  } else { tag=`<span class="kk-tag" style="background:#ddd;">Anulado</span>`; }
+  return `<div class="kk-row ${cls}"><div class="kk-cod">${escapeHtml(r.id)}</div>
+    <div class="kk-det">${tag}<small>${hora}${r.estado==='pendiente' ? ' · '+elegido : ''}</small><br>${escapeHtml(r.resumen)}</div>
+    <div class="kk-monto">$${Number(r.total).toLocaleString('es-CL')}</div><div class="kk-acc">${acc}</div></div>`;
+}
+function kioscoImprimir(v, id){
+  v.comprador = 'Pedido '+id;
+  v.montoRecibido = null; v.vuelto = null;
+  imprimirVoucherCompleto(v);
+}
+async function kioscoConfirmar(id, metodo){
+  const fila = kioscoRows.find(r=>r.id===id);
+  if(!confirm('¿Confirmas que el pago de '+id+' ($'+Number(fila.total).toLocaleString('es-CL')+') llegó '+(metodo==='efectivo'?'en EFECTIVO':'por TRANSFERENCIA')+'?\n\nSe asignarán los cartones y se imprimirá el voucher.')) return;
+  try{
+    const r = await callBackend('kioscoConfirmar', {password: adminPassword, id, metodo});
+    kioscoImprimir(r.voucher, id);
+    kioscoLoad(); loadPurchases();
+  }catch(err){ alert('No se pudo confirmar: '+err.message); kioscoLoad(); }
+}
+function kioscoReimprimir(id){
+  const fila = kioscoRows.find(r=>r.id===id);
+  if(!fila || !fila.voucher){ alert('Este pedido no tiene voucher guardado.'); return; }
+  try{ kioscoImprimir(JSON.parse(fila.voucher), id); }catch(e){ alert('No se pudo leer el voucher.'); }
+}
+async function kioscoEntregar(id, entregado){
+  try{
+    await callBackend('kioscoEntregar', {password: adminPassword, id, entregado});
+    kioscoLoad(); loadPurchases();
+  }catch(err){ alert('No se pudo actualizar: '+err.message); }
+}
+async function kioscoAnular(id){
+  if(!confirm('¿Anular el pedido '+id+'? (el cliente no pagó)')) return;
+  try{ await callBackend('kioscoAnular', {password: adminPassword, id}); kioscoLoad(); }
+  catch(err){ alert('No se pudo anular: '+err.message); }
+}
+// Se actualiza solo cada 10 segundos mientras el panel esté abierto
+setInterval(()=>{ if(adminPassword && !document.hidden && document.getElementById('adminPanel').style.display!=='none') kioscoLoad(); }, 10000);
+
 /* ============ CAJA: VENTA PRESENCIAL ============ */
 let cajaTab = 'top';
 let unidadesSueltas = 0;
@@ -1785,7 +1900,7 @@ function setCajaTab(t){ cajaTab = t; renderCaja(); }
 function topKeys(items){
   const cuenta = {};
   items.forEach(i=> cuenta[i.k] = 0);
-  purchasesCache.filter(p=>p.modo==='presencial').forEach(p=>{
+  purchasesCache.filter(p=>p.modo==='presencial'||p.modo==='kiosco').forEach(p=>{
     const c = Number(p.cantidad)||0;
     cuenta.s += Math.floor(c/6); cuenta.u += c%6;
   });
@@ -1918,7 +2033,7 @@ function calcularTotalVenta(){
 function ventasCajaAgrupadas(){
   const usados = new Set();
   const out = [];
-  purchasesCache.filter(p=>p.modo==='presencial').forEach(p=>{
+  purchasesCache.filter(p=>p.modo==='presencial'||p.modo==='kiosco').forEach(p=>{
     const b = bebestiblesVentasCache.find(x=>x.ventaCartonesRef===p.id);
     if(b) usados.add(b.id);
     out.push({
