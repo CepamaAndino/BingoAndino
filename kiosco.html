@@ -195,7 +195,10 @@ function categoria(p){ return /caf[eé]|(^|\s)t[eé](\s|$)|chocolate|leche|sopai
 function fotoPorNombre(nombre){
   const n=String(nombre||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const f=x=>'img/productos/'+x+'.webp';
-  if(/pepsi/.test(n)) return f(/zero|cero/.test(n)?'pepsi-zero':'pepsi');
+  if(/lipton|ice ?tea/.test(n)) return f('lipton-limon');
+  if(/vaso/.test(n)) return f('vaso');
+  if(/corea|bong|uva/.test(n)) return f('jugo-corea');
+  if(/pepsi/.test(n)) return f(/botella|1[,.]5|litro|lts/.test(n)?'pepsi-botella':(/zero|cero/.test(n)?'pepsi-zero':'pepsi'));
   if(/limon|canada/.test(n)) return f('limon-soda');
   if(/crush|naranja/.test(n)) return f('crush');
   if(/cachantun|agua/.test(n)) return f(/sin gas|natural/.test(n)?'cachantun-singas':(/gas/.test(n)?'cachantun-gas':'cachantun-singas'));
