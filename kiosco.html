@@ -188,16 +188,29 @@ function precioSets(n){
 const precioSet1=()=>modo==='evento'?12000:9000;
 function icono(n){n=String(n||'').toLowerCase();
   if(/jugo/.test(n))return'🧃';if(/caf[eé]/.test(n))return'☕';if(/(^|\s)t[eé](\s|$)/.test(n))return'🍵';
-  if(/agua/.test(n))return'💧';if(/sopaip|galleta|snack|papas|cabritas|brownie|queque|torta|dulce|completo|empanada|pizza/.test(n))return'🍪';return'🥤';}
-function categoria(p){ return /caf[eé]|(^|\s)t[eé](\s|$)|chocolate|leche|sopaip|galleta|snack|papas|cabritas|brownie|queque|torta|dulce|completo|empanada|pizza|lipton/i.test(p.nombre)&&!/lipton|lata|jugo|bilz|agua/i.test(p.nombre) ? 'cafeteria':'bebidas'; }
+  if(/agua/.test(n))return'💧';if(/sopaip|galleta|snack|papas|cabritas|brownie|queque|torta|dulce|completo|empanada|pizza|buka|mix/.test(n))return'🍪';return'🥤';}
+function categoria(p){ return /caf[eé]|(^|\s)t[eé](\s|$)|chocolate|leche|sopaip|galleta|snack|papas|cabritas|brownie|queque|torta|dulce|completo|empanada|pizza|buka|mix|vegetal|lipton/i.test(p.nombre)&&!/lipton|lata|jugo|bilz|agua/i.test(p.nombre) ? 'cafeteria':'bebidas'; }
 
+/* ---------- fotos: si el producto no trae foto en la planilla (col. D), se busca por nombre en img/productos/ ---------- */
+function fotoPorNombre(nombre){
+  const n=String(nombre||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const f=x=>'img/productos/'+x+'.webp';
+  if(/pepsi/.test(n)) return f(/zero|cero/.test(n)?'pepsi-zero':'pepsi');
+  if(/limon|canada/.test(n)) return f('limon-soda');
+  if(/crush|naranja/.test(n)) return f('crush');
+  if(/cachantun|agua/.test(n)) return f(/sin gas|natural/.test(n)?'cachantun-singas':(/gas/.test(n)?'cachantun-gas':'cachantun-singas'));
+  if(/buka|mix|vegetal/.test(n)) return f('mix-buka');
+  if(/(^|\s)cafe/.test(n)) return f('cafe');
+  if(/(^|\s)te(\s|$)/.test(n)) return f('te');
+  return '';
+}
 /* ---------- catálogo ---------- */
 function items(){
   const l=[
     {k:'sets',cat:'cartones',nombre:'Set de 6 cartones',sub:'6 cartones para jugar',img:'img/set.png',precio:precioSet1(),nota: modo==='evento'?'':'2 sets: $12.000',max:MAX_SETS},
     {k:'sueltos',cat:'cartones',nombre:'Cartón suelto',sub:'',img:'img/carton.png',precio:precioSuelto(),nota:'',max:MAX_SUELTOS}
   ];
-  productos.forEach(p=>l.push({k:p.id,cat:categoria(p),nombre:p.nombre,sub:'',img:p.foto||'',emoji:icono(p.nombre),precio:Number(p.precio),nota:'',max:MAX_UNID}));
+  productos.forEach(p=>l.push({k:p.id,cat:categoria(p),nombre:p.nombre,sub:'',img:p.foto||fotoPorNombre(p.nombre),emoji:icono(p.nombre),precio:Number(p.precio),nota:'',max:MAX_UNID}));
   return l;
 }
 function montoLinea(it,q){ return it.k==='sets'?precioSets(q):q*it.precio; }
