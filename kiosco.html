@@ -147,6 +147,9 @@ aside small{display:block;text-align:center;color:var(--mute);font-size:17px;mar
 .wspbox{display:flex;align-items:center;padding:0;overflow:hidden;margin-bottom:6px}
 .wspbox span{background:#eef2fb;height:100%;display:flex;align-items:center;padding:0 16px;font-size:28px;font-weight:800;border-right:2px solid var(--line)}
 .wspbox input{flex:1;min-width:0;height:100%;border:0;outline:0;padding:0 16px;font-size:30px;font-family:inherit;font-weight:700;letter-spacing:2px;color:var(--ink);user-select:text;-webkit-user-select:text}
+.sec{grid-column:1/-1;font-size:clamp(20px,2.2vw,26px);font-weight:900;color:var(--navy);display:flex;align-items:center;gap:12px;margin:10px 0 -2px}
+.sec:after{content:"";flex:1;height:3px;background:var(--gold);border-radius:3px}
+.sec:first-child{margin-top:0}
 </style>
 </head>
 <body>
@@ -323,10 +326,30 @@ function renderTabs(){
 }
 function setTab(t){tab=t;renderTabs();renderGrid();}
 function foto(it){ return it.img?`<img src="${esc(it.img)}" alt="" onerror="this.outerHTML='<span>${it.emoji||'🎟️'}</span>'">`:`<span>${it.emoji||'🎟️'}</span>`; }
+/* ---------- secciones por tipo ---------- */
+const GRUPOS=[['cartones','🎟️ Cartones'],['latas','🥫 Latas'],['grandes','🍾 Bebidas 1,5L · para compartir'],['jugos','🧃 Jugos y aguas'],['cafeteria','☕ Cafetería y snacks'],['otros','🛍️ Otros']];
+function grupo(it){
+  if(it.cat==='cartones') return 'cartones';
+  const n=String(it.nombre||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  if(/1[,.][56] ?l|litro/.test(n)) return 'grandes';
+  if(/lata|lipton|citrus/.test(n)) return 'latas';
+  if(/600|cachantun|agua|jugo|bolsa|mas /.test(n)) return 'jugos';
+  if(it.cat==='cafeteria'||/vaso|cafe|(^|\s)te(\s|$)|papas|buka|snack/.test(n)) return 'cafeteria';
+  return 'otros';
+}
 function renderGrid(){
   const l=items().filter(it=>tab==='todo'||it.cat===tab);
   if(!l.length){$('grid').innerHTML='<div class="load" style="grid-column:1/-1">No hay productos en esta categoría.</div>';return;}
+  const orden={}; GRUPOS.forEach(([k],i)=>orden[k]=i);
+  l.forEach((it,i)=>{it._g=grupo(it);it._i=i;});
+  l.sort((a,b)=>orden[a._g]-orden[b._g]||a._i-b._i);
+  let prev=null;
   $('grid').innerHTML=l.map(it=>{
+    let h='';
+    if(it._g!==prev){ prev=it._g; h=`<div class="sec">${(GRUPOS.find(g=>g[0]===it._g)||['',''])[1]}</div>`; }
+    return h+tarjeta(it);}).join('');
+}
+function tarjeta(it){
     const q=qty[it.k]||0;
     if(it.stock===0) return `<div class="card agotado">
       <div class="ph">${foto(it)}</div>
@@ -341,7 +364,7 @@ function renderGrid(){
       <div class="pr">${clp(it.precio)}${it.nota?` <small>· ${it.nota}</small>`:''}</div>
       ${q?`<div class="step" onclick="event.stopPropagation()"><button onclick="menos('${it.k}')">−</button><b>${q}</b><button onclick="mas('${it.k}')">+</button></div>`
          :`<button class="add">＋ Agregar</button>`}
-    </div>`;}).join('');
+    </div>`;
 }
 function renderCart(){
   const l=items().filter(it=>(qty[it.k]||0)>0);
