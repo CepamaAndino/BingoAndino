@@ -291,6 +291,7 @@ function fotoPorNombre(nombre){
     if(/kem/.test(n)) return f('kem-pina-lata');
     if(/limon soda|limonsoda/.test(n)) return f('limon-soda-zero-lata');
     if(/ginger|canada dry/.test(n)) return f('ginger-ale-zero-lata');
+    if(/pepsi/.test(n)&&/zero|cero/.test(n)) return f('pepsi-zero-lata');
     if(/pepsi/.test(n)&&/lata|350/.test(n)) return f('pepsi-lata');
   }
   if(/bolsa|ice ?talk/.test(n)) return f('jugo-bolsa-corea-v2');
