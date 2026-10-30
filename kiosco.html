@@ -279,6 +279,7 @@ function fotoPorNombre(nombre){
   // formatos grandes y 600cc (pedido CCU) — van primero para no confundirse con las latas
   const grande=/1[,.][56]|litro|lts/.test(n), chica=/600/.test(n);
   if(/citrus/.test(n)) return f('latas-citrus');
+  if(/coco ?palm|lata corea/.test(n)) return f('coco-palm-lata');
   // Ice Talk por sabor (bolsa + vaso)
   if(/granada/.test(n)) return f('icetalk-granada');
   if(/limonada azul|blue lemon/.test(n)) return f('icetalk-limonada-azul');
