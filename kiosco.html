@@ -279,6 +279,20 @@ function fotoPorNombre(nombre){
   // formatos grandes y 600cc (pedido CCU) — van primero para no confundirse con las latas
   const grande=/1[,.][56]|litro|lts/.test(n), chica=/600/.test(n);
   if(/citrus/.test(n)) return f('latas-citrus');
+  // Ice Talk por sabor (bolsa + vaso)
+  if(/granada/.test(n)) return f('icetalk-granada');
+  if(/limonada azul|blue lemon/.test(n)) return f('icetalk-limonada-azul');
+  if(/arandano|blueberry/.test(n)) return f('icetalk-arandano');
+  if(/uva verde|green grape/.test(n)) return f('icetalk-uva-verde');
+  if(/sandia|watermelon/.test(n)) return f('icetalk-sandia');
+  // latas individuales 350ml (las de 1,5L se resuelven más abajo)
+  if(!grande){
+    if(/bilz/.test(n)) return f('bilz-zero-lata');
+    if(/kem/.test(n)) return f('kem-pina-lata');
+    if(/limon soda|limonsoda/.test(n)) return f('limon-soda-zero-lata');
+    if(/ginger|canada dry/.test(n)) return f('ginger-ale-zero-lata');
+    if(/pepsi/.test(n)&&/lata|350/.test(n)) return f('pepsi-lata');
+  }
   if(/bolsa|ice ?talk/.test(n)) return f('jugo-bolsa-corea-v2');
   if(/kem/.test(n)) return f('kem-xtreme-15');
   if(/7 ?up/.test(n)) return f('7up-15');
@@ -333,7 +347,7 @@ function grupo(it){
   const n=String(it.nombre||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   if(/1[,.][56] ?l|litro/.test(n)) return 'grandes';
   if(/lata|lipton|citrus/.test(n)) return 'latas';
-  if(/600|cachantun|agua|jugo|bolsa|mas /.test(n)) return 'jugos';
+  if(/600|cachantun|agua|jugo|bolsa|mas |ice ?talk/.test(n)) return 'jugos';
   if(it.cat==='cafeteria'||/vaso|cafe|(^|\s)te(\s|$)|papas|buka|snack/.test(n)) return 'cafeteria';
   return 'otros';
 }
