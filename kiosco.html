@@ -37,6 +37,10 @@ header{background:linear-gradient(90deg,var(--navy2),var(--navy));display:flex;a
 .card .pr small{font-size:14px;color:var(--mute);font-weight:600}
 .add,.step{width:100%;height:56px;border-radius:12px;font-size:21px;font-weight:700}
 .add{background:#eef2fb;display:flex;align-items:center;justify-content:center;gap:8px}
+.card.agotado{position:relative;overflow:hidden;background:#f6f6f6;border-color:#e6c2c2;cursor:not-allowed}
+.card.agotado .ph,.card.agotado .nm,.card.agotado .pr{opacity:.4}
+.card.agotado::after{content:"";position:absolute;left:-12%;right:-12%;top:42%;height:7px;background:#d0161f;transform:rotate(-20deg);border-radius:4px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.sinstock{position:relative;z-index:1;width:100%;height:56px;border-radius:12px;background:#d0161f;color:#fff;font-size:21px;font-weight:900;letter-spacing:1px;display:flex;align-items:center;justify-content:center}
 .step{background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 6px}
 .step button{width:64px;height:48px;background:transparent;color:#fff;font-size:32px;font-weight:700}
 .step b{font-size:26px}
@@ -220,9 +224,12 @@ function items(){
     {k:'sets',cat:'cartones',nombre:'Set de 6 cartones',sub:'6 cartones para jugar',img:'img/set.png',precio:precioSet1(),nota: modo==='evento'?'':'2 sets: $12.000',max:MAX_SETS},
     {k:'sueltos',cat:'cartones',nombre:'Cartón suelto',sub:'',img:'img/carton.png',precio:precioSuelto(),nota:'',max:MAX_SUELTOS}
   ];
-  productos.forEach(p=>l.push({k:p.id,cat:categoria(p),nombre:p.nombre,sub:'',img:p.foto||fotoPorNombre(p.nombre),emoji:icono(p.nombre),precio:Number(p.precio),nota:'',max:MAX_UNID}));
+  productos.forEach(p=>{ const st=stockDe(p);
+    l.push({k:p.id,cat:categoria(p),nombre:p.nombre,sub:'',img:p.foto||fotoPorNombre(p.nombre),emoji:icono(p.nombre),precio:Number(p.precio),nota:'',max:st===null?MAX_UNID:Math.min(MAX_UNID,st),stock:st}); });
   return l;
 }
+// stock: vacío = ilimitado; número = unidades disponibles
+function stockDe(p){ return (p.stock===''||p.stock===null||p.stock===undefined) ? null : Math.max(0,Number(p.stock)||0); }
 function montoLinea(it,q){ return it.k==='sets'?precioSets(q):q*it.precio; }
 function total(){ return items().reduce((s,it)=>s+montoLinea(it,qty[it.k]||0),0); }
 function cuenta(){ return Object.values(qty).reduce((s,n)=>s+n,0); }
@@ -238,6 +245,12 @@ function renderGrid(){
   if(!l.length){$('grid').innerHTML='<div class="load" style="grid-column:1/-1">No hay productos en esta categoría.</div>';return;}
   $('grid').innerHTML=l.map(it=>{
     const q=qty[it.k]||0;
+    if(it.stock===0) return `<div class="card agotado">
+      <div class="ph">${foto(it)}</div>
+      <div class="nm">${esc(it.nombre)}</div>
+      <div class="pr">${clp(it.precio)}</div>
+      <div class="sinstock">SIN STOCK</div>
+    </div>`;
     return `<div class="card ${q?'on':''}" onclick="${q?'':`mas('${it.k}')`}">
       <div class="ph">${foto(it)}</div>
       <div class="nm">${esc(it.nombre)}</div>
@@ -258,6 +271,7 @@ function renderCart(){
 }
 function render(){renderGrid();renderCart();}
 function mas(k){const it=items().find(x=>x.k===k);if(!it)return;const q=qty[k]||0;
+  if(it.stock!==null&&it.stock!==undefined&&q>=it.stock){toast(it.stock===0?'Producto sin stock':'No queda más stock de este producto');return;}
   if(q>=it.max){toast('Máximo '+it.max+' por compra. Para más, consulta en la caja.');return;}
   if(it.cat==='cartones'&&disponibles!==null){const nec=(k==='sets'?(q+1)*6:(qty.sets||0)*6+q+1);if(k==='sueltos'&&nec>disponibles){toast('No quedan más cartones');return;}if(k==='sets'&&nec+(qty.sueltos||0)>disponibles){toast('No quedan más cartones');return;}}
   qty[k]=q+1;render();tocado();}
@@ -277,7 +291,7 @@ async function crear(metodo){
     const payload={nombre:$('nombre').value.trim(),sueltos:qty.sueltos||0,sets:qty.sets||0,metodo,items:productos.filter(p=>qty[p.id]).map(p=>({id:p.id,cantidad:qty[p.id]}))};
     const r=await callBackend('kioscoCrear',payload);
     ultimoPedido=r; mostrarCodigo(r); 
-  }catch(e){ $('err2').innerHTML=`<div class="err">${esc(e.message)}</div>`; }
+  }catch(e){ $('err2').innerHTML=`<div class="err">${esc(e.message)}</div>`; if(/stock/i.test(e.message)) cargarCatalogo(true); }
   finally{ enviando=false; }
 }
 function mostrarCodigo(r){
@@ -304,6 +318,8 @@ async function cargarCatalogo(silencioso){
   try{
     const c=await callBackend('kioscoCatalogo',{});
     modo=c.modo; productos=c.productos||[]; disponibles=c.disponibles; $('msg').innerHTML='';
+    // si un producto se agotó mientras armaban la compra, se ajusta el carrito
+    productos.forEach(p=>{const st=stockDe(p); if(st!==null&&qty[p.id]>st){ if(st>0) qty[p.id]=st; else delete qty[p.id]; }});
     // si cambió el modo/precios, la pantalla se actualiza sola (sin tocar el carrito)
     render();
   }catch(e){

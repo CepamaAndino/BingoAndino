@@ -286,6 +286,13 @@
   .caja-item .nm{ font-weight:700; font-size:13.5px; line-height:1.15; }
   .caja-item .pr{ font-weight:900; font-size:19px; }
   .caja-item .sb{ font-size:11px; color:#7a6a4f; }
+  .caja-item .stk{ font-size:11px; font-weight:700; color:#3f7d4f; }
+  .caja-item.agotado{ cursor:not-allowed; background:#f6f6f6; border-color:#e0b4b4; overflow:hidden; }
+  .caja-item.agotado .ic,.caja-item.agotado .nm,.caja-item.agotado .pr{ opacity:.45; }
+  .caja-item.agotado::after{ content:""; position:absolute; left:-10%; right:-10%; top:50%; height:4px; background:#d0161f; transform:rotate(-18deg); }
+  .caja-item .sin{ position:relative; z-index:1; background:#d0161f; color:#fff; font-size:11px; font-weight:800; letter-spacing:.5px; padding:2px 8px; border-radius:20px; margin-top:2px; }
+  .prod-edit-row input.stk-in{ flex:.8; }
+  .prod-edit-row .sin{ background:#d0161f; color:#fff; font-size:11px; font-weight:800; padding:3px 8px; border-radius:20px; white-space:nowrap; }
   .caja-item .bdg{ position:absolute; top:-9px; right:-9px; min-width:32px; height:32px; padding:0 6px; border-radius:99px; background:var(--ok); color:#fff; font-weight:900; font-size:17px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,.25); }
   .caja-item .menos{ position:absolute; top:-10px; left:-10px; width:38px; height:38px; border-radius:50%; background:#f1e9d3; border:1.5px solid #d9c9a0; font-weight:900; font-size:22px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; }
   .caja-item.mas{ border-style:dashed; color:#7a6a4f; background:transparent; }
@@ -860,11 +867,12 @@ body.modo-estado #dispCounter, body.modo-estado #flowHead, body.modo-estado #flo
           <span class="chev">▼</span>
         </div>
         <div id="gestionBody">
-        <p class="sub">Edita precios, agrega o elimina productos del catálogo.</p>
+        <p class="sub">Edita precios y stock, agrega o elimina productos. Columnas: nombre · precio · stock (déjalo vacío si no tiene límite). Cuando el stock llega a 0 aparece "Sin stock" en el kiosco.</p>
         <div id="gestionBebestiblesList"></div>
         <div style="display:flex; gap:8px; margin-top:12px;">
           <input type="text" id="nuevoProductoNombre" placeholder="Nombre del producto" style="flex:2;">
           <input type="number" id="nuevoProductoPrecio" placeholder="Precio" min="0" style="flex:1;">
+          <input type="number" id="nuevoProductoStock" placeholder="Stock (vacío = ∞)" min="0" style="flex:1;">
           <button class="btn btn-secondary btn-sm" onclick="agregarProducto()">+ Agregar</button>
         </div>
         <div class="err" id="productoErr"></div>
@@ -1777,7 +1785,10 @@ async function loadProductosAdmin(){
   try{
     const r = await callBackend('listProductos', {password: adminPassword});
     productosCache = r.rows;
-    productosCache.forEach(p=>{ if(!(p.id in ventaBebestiblesQty)) ventaBebestiblesQty[p.id] = 0; });
+    productosCache.forEach(p=>{
+      if(!(p.id in ventaBebestiblesQty)) ventaBebestiblesQty[p.id] = 0;
+      const st = stockDe(p); if(st!==null && ventaBebestiblesQty[p.id] > st) ventaBebestiblesQty[p.id] = st;
+    });
     renderBebestiblesVenta();
     renderGestionBebestibles();
   }catch(err){ /* silencioso */ }
@@ -1868,7 +1879,7 @@ async function kioscoAnular(id){
   catch(err){ alert('No se pudo anular: '+err.message); }
 }
 // Se actualiza solo cada 10 segundos mientras el panel esté abierto
-setInterval(()=>{ if(adminPassword && !document.hidden && document.getElementById('adminPanel').style.display!=='none') kioscoLoad(); }, 10000);
+setInterval(()=>{ if(adminPassword && !document.hidden && document.getElementById('adminPanel').style.display!=='none'){ kioscoLoad(); loadProductosAdmin(); } }, 10000);
 
 /* ============ CAJA: VENTA PRESENCIAL ============ */
 let cajaTab = 'top';
@@ -1887,6 +1898,8 @@ function iconoProducto(n){
   if(/agua/.test(n)) return '💧';
   return '🥤';
 }
+// stock: vacío = ilimitado; número = unidades disponibles
+function stockDe(p){ return (p.stock===''||p.stock===null||p.stock===undefined) ? null : Math.max(0, Number(p.stock)||0); }
 function cajaItems(){
   const items = [
     { k:'u', tipo:'cartones', nombre:'Cartón individual', icon:'🎟️', precio:precioUnitarioCarton(), sub:'', qty:unidadesSueltas },
@@ -1894,7 +1907,7 @@ function cajaItems(){
       sub: setsCount===2 ? 'Pack familia: 2 sets $12.000' : '6 cartones', qty:setsCount }
   ];
   productosCache.forEach(p=> items.push({ k:p.id, tipo:'bebestibles', nombre:p.nombre, icon:iconoProducto(p.nombre),
-    precio:Number(p.precio), sub:'', qty:ventaBebestiblesQty[p.id]||0 }));
+    precio:Number(p.precio), sub:'', qty:ventaBebestiblesQty[p.id]||0, stock:stockDe(p) }));
   return items;
 }
 function setCajaTab(t){ cajaTab = t; renderCaja(); }
@@ -1931,12 +1944,13 @@ function renderCaja(){
   const grid = document.getElementById('cajaGrid');
   if(!items.length){ grid.innerHTML = '<p class="note">No hay productos en el catálogo todavía.</p>'; }
   else grid.innerHTML = items.map(i=>`
-    <div class="caja-item ${i.qty>0?'has':''}" role="button" tabindex="0" onclick="cajaCambiar('${i.k}',1)">
+    <div class="caja-item ${i.qty>0?'has':''} ${i.stock===0?'agotado':''}" role="button" tabindex="0" onclick="cajaCambiar('${i.k}',1)">
       ${i.qty>0 ? `<div class="bdg">${i.qty}</div><button type="button" class="menos" title="Quitar uno" onclick="event.stopPropagation();cajaCambiar('${i.k}',-1)">−</button>` : ''}
       <div class="ic">${i.icon}</div>
       <div class="nm">${escapeHtml(i.nombre)}</div>
       <div class="pr">$${i.precio.toLocaleString('es-CL')}</div>
       ${i.sub ? `<div class="sb">${escapeHtml(i.sub)}</div>` : ''}
+      ${i.stock===0 ? '<div class="sin">SIN STOCK</div>' : (i.stock!==null && i.stock!==undefined ? `<div class="stk">Stock: ${i.stock - i.qty}</div>` : '')}
     </div>`).join('')
     + (cajaTab==='top' ? `<div class="caja-item mas" role="button" tabindex="0" onclick="setCajaTab('todos')"><div class="ic">＋</div><div class="nm">Ver todos</div></div>` : '');
   calcularTotalVenta();
@@ -1947,7 +1961,13 @@ function renderBebestiblesVenta(){ renderCaja(); }
 function cajaCambiar(k, d){
   if(k==='u') unidadesSueltas = Math.max(0, unidadesSueltas + d);
   else if(k==='s') setsCount = Math.max(0, setsCount + d);
-  else ventaBebestiblesQty[k] = Math.max(0, (ventaBebestiblesQty[k]||0) + d);
+  else {
+    const p = productosCache.find(x=>x.id===k), st = p ? stockDe(p) : null;
+    const nuevo = Math.max(0, (ventaBebestiblesQty[k]||0) + d);
+    if(d>0 && st!==null && nuevo>st){ document.getElementById('ventaErr').textContent = st===0 ? (p.nombre+': sin stock.') : ('Solo quedan '+st+' de '+p.nombre+'.'); return; }
+    document.getElementById('ventaErr').textContent = '';
+    ventaBebestiblesQty[k] = nuevo;
+  }
   renderCaja();
 }
 function limpiarVenta(){
@@ -2097,7 +2117,9 @@ function renderGestionBebestibles(){
   box.innerHTML = productosCache.map(p=>`
     <div class="prod-edit-row">
       <input type="text" value="${escapeHtml(p.nombre)}" id="pname-${p.id}">
-      <input type="number" value="${p.precio}" min="0" id="pprice-${p.id}">
+      <input type="number" value="${p.precio}" min="0" id="pprice-${p.id}" title="Precio">
+      <input type="number" class="stk-in" value="${stockDe(p)===null?'':stockDe(p)}" min="0" id="pstock-${p.id}" placeholder="∞" title="Stock (vacío = ilimitado)">
+      ${stockDe(p)===0 ? '<span class="sin">SIN STOCK</span>' : ''}
       <button type="button" class="btn btn-secondary btn-sm" onclick="guardarProductoEdit('${p.id}')">Guardar</button>
       <button type="button" class="btn btn-sm" style="background:var(--rech);color:#fff;" onclick="eliminarProductoUI('${p.id}')">🗑️</button>
     </div>
@@ -2106,10 +2128,11 @@ function renderGestionBebestibles(){
 async function guardarProductoEdit(id){
   const nombre = document.getElementById('pname-'+id).value.trim();
   const precio = document.getElementById('pprice-'+id).value;
+  const stock = document.getElementById('pstock-'+id).value.trim();
   const errBox = document.getElementById('productoErr');
   errBox.textContent='';
   try{
-    await callBackend('guardarProducto', {password: adminPassword, id, nombre, precio});
+    await callBackend('guardarProducto', {password: adminPassword, id, nombre, precio, stock});
     await loadProductosAdmin();
   }catch(err){ errBox.textContent = err.message; }
 }
@@ -2126,13 +2149,15 @@ async function eliminarProductoUI(id){
 async function agregarProducto(){
   const nombre = document.getElementById('nuevoProductoNombre').value.trim();
   const precio = document.getElementById('nuevoProductoPrecio').value;
+  const stock = document.getElementById('nuevoProductoStock').value.trim();
   const errBox = document.getElementById('productoErr');
   errBox.textContent='';
   if(!nombre || precio===''){ errBox.textContent='Completa nombre y precio.'; return; }
   try{
-    await callBackend('guardarProducto', {password: adminPassword, nombre, precio});
+    await callBackend('guardarProducto', {password: adminPassword, nombre, precio, stock});
     document.getElementById('nuevoProductoNombre').value='';
     document.getElementById('nuevoProductoPrecio').value='';
+    document.getElementById('nuevoProductoStock').value='';
     await loadProductosAdmin();
   }catch(err){ errBox.textContent = err.message; }
 }
@@ -2165,6 +2190,7 @@ async function registrarVentaPresencial(){
     limpiarVenta();
     imprimirVoucherCompleto(r);
     await loadPurchases();
+    loadProductosAdmin();
   }catch(err){
     errBox.textContent = err.message;
     calcularTotalVenta();
