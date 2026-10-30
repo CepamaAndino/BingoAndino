@@ -332,10 +332,14 @@ function mostrarCodigo(r){
   const transf=r.metodo!=='efectivo';
   $('blkTransf').classList.toggle('hidden',!transf); $('qrbox').classList.toggle('hidden',!transf); $('blkEfe').classList.toggle('hidden',transf);
   $('t3').textContent=transf?'Tu código de compra':'Tu código de compra · pagas en la caja';
-  $('datos').innerHTML=DATOS.map(([k,v,c])=>`<button onclick="copiar('${c.replace(/'/g,"\\'")}')"><i>${k}</i><u>${esc(v)} 📋</u></button>`).join('');
+  // datos bancarios + monto y código (el código va como mensaje de la transferencia / correo)
+  const extra=[['Monto a transferir',clp(r.total),String(r.total)],['Mensaje (código)',r.codigo,r.codigo]];
+  $('datos').innerHTML=extra.concat(DATOS).map(([k,v,c],i)=>`<button onclick="copiar('${c.replace(/'/g,"\\'")}')"${i<2?' style="background:#fff7d6;margin:0 -18px;padding-left:18px;padding-right:18px"':''}><i>${k}</i><u>${esc(v)} 📋</u></button>`).join('');
   ver(3);
 }
-function copiarTodo(){ copiar('PATRICIA BRAVO ALCAINO\nRUT: 16.859.492-5\nBanco Estado\nCuenta Corriente\nN° Cuenta: 33000074697\nEmail: cepama@colegioandino.cl','✅ Todos los datos copiados'); }
+function copiarTodo(){ const r=ultimoPedido||{};
+  copiar('PATRICIA BRAVO ALCAINO\nRUT: 16.859.492-5\nBanco Estado\nCuenta Corriente\nN° Cuenta: 33000074697\nEmail: cepama@colegioandino.cl'
+    +(r.codigo?'\nMonto: '+clp(r.total)+'\nMensaje: '+r.codigo+' Bingo Andino':''),'✅ Todos los datos copiados'); }
 function nueva(){ $('nombre').value='';qty={};ultimoPedido=null;ver(1);render();cargarCatalogo(true); }
 async function copiar(t,msg){ try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()} toast(msg||('✅ Copiado: '+t)); tocado(); }
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2200);}
