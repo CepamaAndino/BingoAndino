@@ -107,6 +107,43 @@ aside small{display:block;text-align:center;color:var(--mute);font-size:17px;mar
  body.conbarra{padding-bottom:90px}
  body.conbarra .fs{bottom:96px}
 }
+/* ---- paso 3: finaliza tu compra ---- */
+.fin{max-width:1240px}
+.fin-t{text-align:center;font-size:clamp(30px,4vw,46px)!important;font-weight:900}
+.fin-s{text-align:center;color:var(--mute);font-size:clamp(17px,1.8vw,21px);margin:2px 0 16px}
+.fin-top{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fin-top button{border-radius:20px;padding:16px 18px 14px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.fin-top small{font-size:clamp(14px,1.45vw,19px);font-weight:900;letter-spacing:1.5px}
+.fin-top b{font-size:clamp(64px,9vw,120px);font-weight:900;line-height:1;margin:4px 0 6px}
+.fin-top i{font-style:normal;font-size:16px;opacity:.85}
+.fin-tot{background:var(--navy);color:#fff}
+.fin-cod{background:var(--gold);color:var(--navy)}
+.fin-cod b{letter-spacing:2px}
+.fin-mid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:16px;margin-top:16px}
+.fin-card{border:2px solid var(--line);border-radius:18px;padding:16px 18px;background:#fff}
+.fin-card h4{font-size:22px;font-weight:900;margin-bottom:10px}
+.fin-nom{font-size:17px;font-weight:700;color:var(--mute);margin:-4px 0 8px}
+#res3 div{background:#eef2fb;border-radius:10px;padding:12px 14px;font-size:18px;font-weight:600;margin-bottom:8px}
+.fin-sub{background:#eef2fb;border-radius:12px;padding:10px 14px;margin-top:12px;border-top:2px solid var(--line)}
+.fin-sub small{display:block;font-size:18px;font-weight:800}.fin-sub b{font-size:44px;font-weight:900;line-height:1.05}
+.fin-h{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}.fin-h h4{margin:0}
+.pend{background:#fff1d0;color:#8a5a00;border-radius:20px;padding:6px 12px;font-size:14px;font-weight:700;white-space:nowrap}
+.fin-dg{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:14px;align-items:start}
+.tabla{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.tabla button{display:grid;grid-template-columns:118px minmax(0,1fr) 22px;align-items:center;width:100%;text-align:left;background:#fff;padding:9px 12px;border-bottom:1px solid var(--line);font-size:16px;gap:8px}
+.tabla button:last-child{border:0}.tabla button:active{background:#eef2fb}
+.tabla i{font-style:normal;color:var(--mute)}.tabla u{text-decoration:none;font-weight:800;overflow-wrap:anywhere}.tabla em{font-style:normal;opacity:.55}
+.fin-qr{text-align:center}.fin-qr img{width:100%;border:1px solid var(--line);border-radius:12px;padding:6px;background:#fff}.fin-qr p{font-size:14px;color:var(--mute);margin-top:4px}
+.fin-copy{margin-top:12px;width:100%;height:58px;border-radius:12px;background:var(--navy);color:#fff;font-size:21px;font-weight:800}
+.fin-efe{text-align:center;font-size:21px;line-height:1.5}.fin-efe .fin-h{text-align:left}.efe-ic{font-size:64px}
+.fin-pasos{display:grid;grid-template-columns:repeat(3,1fr);border:2px solid var(--line);border-radius:18px;margin-top:16px;padding:14px 8px}
+.fin-pasos div{display:flex;align-items:center;gap:14px;padding:4px 14px;font-size:17px;color:var(--mute);line-height:1.3}
+.fin-pasos div+div{border-left:2px solid var(--line)}
+.fin-pasos span{flex:none;width:52px;height:52px;border-radius:50%;background:var(--gold);color:var(--navy);font-size:26px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.fin-pasos b{display:block;color:var(--ink);font-size:19px}
+.fin-new{display:block;margin:18px auto 0;border:2px solid var(--navy);border-radius:12px;padding:14px 40px;font-size:20px;font-weight:800;background:#fff;color:var(--navy)}
+@media(max-width:1000px){.fin-top,.fin-mid,.fin-pasos{grid-template-columns:1fr}.fin-pasos div+div{border-left:0;border-top:2px solid var(--line);padding-top:10px;margin-top:6px}.fin-dg{grid-template-columns:1fr}.fin-qr{display:none}.fin-dat,.fin-efe{order:-1}.fin-h{flex-wrap:wrap}.fin-h h4{white-space:nowrap}.tabla button{grid-template-columns:96px minmax(0,1fr) 22px;font-size:15px}}
+@media(max-width:600px){header{padding:8px 12px}.brand{gap:10px}.brand svg{width:38px;height:38px}.brand h1{font-size:28px}.brand p{font-size:14px}.logos .sep,.logos img+.sep+img{display:none}.logos img{height:48px}.fs{display:none}}
 </style>
 </head>
 <body>
@@ -152,24 +189,36 @@ aside small{display:block;text-align:center;color:var(--mute);font-size:17px;mar
 </div>
 
 <!-- PASO 3: CÓDIGO -->
-<div id="v3" class="center hidden">
-  <h2 id="t3">Tu código de compra</h2>
-  <div class="codebox"><small>Muéstralo en la caja</small><b id="cod">K-0000</b></div>
-  <div class="two">
-    <div>
-      <div class="bigtot">Total: <b id="tot3">$0</b></div>
-      <div id="nom3" style="font-size:24px;font-weight:800;margin:-4px 0 10px"></div>
-      <div class="resumen" id="res3" style="font-size:19px;margin:0 0 12px"></div>
-      <div id="blkTransf">
-        <button class="copyall" onclick="copiarTodo()">📋 Copiar todos los datos</button>
-        <div class="datos" id="datos"></div>
-        <div class="steps">1) Transfiere el total&nbsp;&nbsp; 2) En el mensaje escribe <b id="cod2"></b>&nbsp;&nbsp; 3) Ve a la caja con tu comprobante</div>
-      </div>
-      <div id="blkEfe" class="steps hidden" style="background:var(--navy)">Ve a la caja, di tu código <b id="cod3"></b> y paga en efectivo. Ahí te entregan tus cartones y productos.</div>
-    </div>
-    <div class="qr" id="qrbox"><img src="img/qr-transferencia.png" alt="QR datos de transferencia"><p>📱 Escanea para ver los datos de transferencia en tu celular</p></div>
+<div id="v3" class="center hidden fin">
+  <h2 class="fin-t" id="t3">Finaliza tu compra</h2>
+  <p class="fin-s" id="s3">Transfiere y presenta tu comprobante en caja.</p>
+  <div class="fin-top">
+    <button class="fin-tot" onclick="copiar(String(ultimoPedido.total),'✅ Monto copiado')"><small>TOTAL A PAGAR</small><b id="tot3">$0</b><i>Toca para copiar</i></button>
+    <button class="fin-cod" onclick="copiar(ultimoPedido.codigo,'✅ Código copiado')"><small id="codLbl">EN EL MENSAJE DE LA TRANSFERENCIA ESCRIBE:</small><b id="cod">K-0000</b><i>Este es tu código de compra.</i></button>
   </div>
-  <button class="new" onclick="nueva()">Nueva compra</button>
+  <div class="fin-mid">
+    <div class="fin-card fin-res">
+      <h4>Resumen de compra</h4>
+      <div id="nom3" class="fin-nom"></div>
+      <div id="res3"></div>
+      <div class="fin-sub"><small>Total a pagar</small><b id="tot3b">$0</b></div>
+    </div>
+    <div class="fin-card fin-dat" id="blkTransf">
+      <div class="fin-h"><h4>Datos para transferir</h4><span class="pend">🕒 Pendiente de pago</span></div>
+      <div class="fin-dg">
+        <div class="tabla" id="datos"></div>
+        <div class="fin-qr" id="qrbox"><img src="img/qr-transferencia.png" alt="QR datos de transferencia"><p>Escanea desde tu celular</p></div>
+      </div>
+      <button class="fin-copy" onclick="copiarTodo()">📋 Copiar datos de transferencia</button>
+    </div>
+    <div class="fin-card fin-efe hidden" id="blkEfe">
+      <div class="fin-h"><h4>Pago en efectivo</h4><span class="pend">🕒 Pendiente de pago</span></div>
+      <div class="efe-ic">💵</div>
+      <p>Ve a la <b>caja</b>, di tu código <b id="cod3"></b> y paga en efectivo.<br>Ahí te entregan tus cartones y productos.</p>
+    </div>
+  </div>
+  <div class="fin-pasos" id="pasos"></div>
+  <button class="fin-new" onclick="nueva()">Hacer otra compra</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -327,14 +376,19 @@ async function crear(metodo){
   finally{ enviando=false; }
 }
 function mostrarCodigo(r){
-  $('cod').textContent=r.codigo; $('cod2').textContent=r.codigo; $('cod3').textContent=r.codigo;
-  $('tot3').textContent=clp(r.total); $('nom3').textContent=r.nombre?('A nombre de: '+r.nombre):''; $('res3').textContent=r.resumen;
   const transf=r.metodo!=='efectivo';
-  $('blkTransf').classList.toggle('hidden',!transf); $('qrbox').classList.toggle('hidden',!transf); $('blkEfe').classList.toggle('hidden',transf);
-  $('t3').textContent=transf?'Tu código de compra':'Tu código de compra · pagas en la caja';
-  // datos bancarios + monto y código (el código va como mensaje de la transferencia / correo)
-  const extra=[['Monto a transferir',clp(r.total),String(r.total)],['Mensaje (código)',r.codigo,r.codigo]];
-  $('datos').innerHTML=extra.concat(DATOS).map(([k,v,c],i)=>`<button onclick="copiar('${c.replace(/'/g,"\\'")}')"${i<2?' style="background:#fff7d6;margin:0 -18px;padding-left:18px;padding-right:18px"':''}><i>${k}</i><u>${esc(v)} 📋</u></button>`).join('');
+  $('cod').textContent=r.codigo; $('cod3').textContent=r.codigo;
+  $('tot3').textContent=clp(r.total); $('tot3b').textContent=clp(r.total);
+  $('nom3').textContent=r.nombre?('A nombre de: '+r.nombre):'';
+  $('res3').innerHTML=String(r.resumen||'').split(' · ').filter(Boolean).map(x=>`<div>${esc(x)}</div>`).join('');
+  $('blkTransf').classList.toggle('hidden',!transf); $('blkEfe').classList.toggle('hidden',transf);
+  $('s3').textContent=transf?'Transfiere y presenta tu comprobante en caja.':'Ve a la caja y paga en efectivo.';
+  $('codLbl').textContent=transf?'EN EL MENSAJE DE LA TRANSFERENCIA ESCRIBE:':'DI ESTE CÓDIGO EN LA CAJA:';
+  $('datos').innerHTML=DATOS.map(([k,v,c])=>`<button onclick="copiar('${c.replace(/'/g,"\\'")}')"><i>${k==='Email'?'Correo':k}</i><u>${esc(v)}</u><em>📋</em></button>`).join('');
+  const P=transf
+    ?[['Transfiere el total',clp(r.total)+' desde tu banco.'],['Escribe '+r.codigo+' en el mensaje','de la transferencia.'],['Presenta tu comprobante en caja','junto con tu código de compra.']]
+    :[['Ve a la caja','con tu código '+r.codigo+'.'],['Paga en efectivo',clp(r.total)+' en total.'],['Retira tu compra','cartones y productos.']];
+  $('pasos').innerHTML=P.map((x,i)=>`<div><span>${i+1}</span><p><b>${esc(x[0])}</b>${esc(x[1])}</p></div>`).join('');
   ver(3);
 }
 function copiarTodo(){ const r=ultimoPedido||{};
