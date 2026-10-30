@@ -208,6 +208,7 @@ function fotoPorNombre(nombre){
   const f=x=>'img/productos/'+x+'.webp';
   if(/lipton|ice ?tea/.test(n)) return f('lipton-limon');
   if(/vaso/.test(n)) return f('vaso');
+  if(/latas? (de )?bebidas?|bebidas? (en )?latas?/.test(n)) return f('latas-bebidas');
   if(/corea|bong|uva/.test(n)) return f('jugo-corea');
   if(/pepsi/.test(n)) return f(/botella|1[,.]5|litro|lts/.test(n)?'pepsi-botella':(/zero|cero/.test(n)?'pepsi-zero':'pepsi'));
   if(/limon|canada/.test(n)) return f('limon-soda');
