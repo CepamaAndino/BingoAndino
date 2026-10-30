@@ -793,7 +793,7 @@ body.modo-estado #dispCounter, body.modo-estado #flowHead, body.modo-estado #flo
             <button type="button" class="btn btn-secondary btn-sm" onclick="kioscoLoad()">🔄</button>
           </div>
         </div>
-        <input type="text" id="kkBuscar" placeholder="🔎 Buscar código (ej: K-0007 o solo 7)" oninput="kioscoRender()" style="margin-top:10px; max-width:380px;">
+        <input type="text" id="kkBuscar" placeholder="🔎 Buscar código o nombre (ej: K-0007, 7 o Juan)" oninput="kioscoRender()" style="margin-top:10px; max-width:380px;">
         <div class="kk-chips" id="kkChips"></div>
         <div id="kkList"><p class="note">Cargando pedidos...</p></div>
       </div>
@@ -1806,7 +1806,9 @@ function kioscoRender(){
   const chips = [['cobrar','⏳ Por cobrar',cobrar.length],['entregar','💳 Por entregar',entregar.length],['entregado','✔ Entregados',hechos.length],['todos','Todos',kioscoRows.length]];
   document.getElementById('kkChips').innerHTML = chips.map(c=>`<button type="button" class="${kioscoFiltro===c[0]?'on':''}" onclick="kioscoSetFiltro('${c[0]}')">${c[1]} (${c[2]})</button>`).join('');
   let lista = kioscoRows;
-  if(buscar) lista = lista.filter(r=>String(r.id).toUpperCase().replace('K-','').replace(/^0+/,'').includes(buscar.replace(/^0+/,'')) );
+  const txt = (document.getElementById('kkBuscar').value||'').trim().toLowerCase();
+  if(buscar && !/^\d+$/.test(buscar)) lista = lista.filter(r=>String(r.nombre||'').toLowerCase().includes(txt) || String(r.id).toLowerCase().includes(txt));
+  else if(buscar) lista = lista.filter(r=>String(r.id).toUpperCase().replace('K-','').replace(/^0+/,'').includes(buscar.replace(/^0+/,'')) );
   else if(kioscoFiltro==='cobrar') lista = cobrar;
   else if(kioscoFiltro==='entregar') lista = entregar;
   else if(kioscoFiltro==='entregado') lista = hechos;
@@ -1832,11 +1834,11 @@ function kioscoFila(r){
     acc = `<button class="b" onclick="kioscoReimprimir('${r.id}')">🖨️</button><button onclick="kioscoEntregar('${r.id}',false)">↩ Deshacer</button>`;
   } else { tag=`<span class="kk-tag" style="background:#ddd;">Anulado</span>`; }
   return `<div class="kk-row ${cls}"><div class="kk-cod">${escapeHtml(r.id)}</div>
-    <div class="kk-det">${tag}<small>${hora}${r.estado==='pendiente' ? ' · '+elegido : ''}</small><br>${escapeHtml(r.resumen)}</div>
+    <div class="kk-det">${tag}${r.nombre ? '<b>'+escapeHtml(r.nombre)+'</b> · ' : ''}<small>${hora}${r.estado==='pendiente' ? ' · '+elegido : ''}</small><br>${escapeHtml(r.resumen)}</div>
     <div class="kk-monto">$${Number(r.total).toLocaleString('es-CL')}</div><div class="kk-acc">${acc}</div></div>`;
 }
-function kioscoImprimir(v, id){
-  v.comprador = 'Pedido '+id;
+function kioscoImprimir(v, id, nombre){
+  v.comprador = 'Pedido '+id+(nombre ? ' · '+nombre : '');
   v.montoRecibido = null; v.vuelto = null;
   imprimirVoucherCompleto(v);
 }
@@ -1845,14 +1847,14 @@ async function kioscoConfirmar(id, metodo){
   if(!confirm('¿Confirmas que el pago de '+id+' ($'+Number(fila.total).toLocaleString('es-CL')+') llegó '+(metodo==='efectivo'?'en EFECTIVO':'por TRANSFERENCIA')+'?\n\nSe asignarán los cartones y se imprimirá el voucher.')) return;
   try{
     const r = await callBackend('kioscoConfirmar', {password: adminPassword, id, metodo});
-    kioscoImprimir(r.voucher, id);
+    kioscoImprimir(r.voucher, id, fila.nombre);
     kioscoLoad(); loadPurchases();
   }catch(err){ alert('No se pudo confirmar: '+err.message); kioscoLoad(); }
 }
 function kioscoReimprimir(id){
   const fila = kioscoRows.find(r=>r.id===id);
   if(!fila || !fila.voucher){ alert('Este pedido no tiene voucher guardado.'); return; }
-  try{ kioscoImprimir(JSON.parse(fila.voucher), id); }catch(e){ alert('No se pudo leer el voucher.'); }
+  try{ kioscoImprimir(JSON.parse(fila.voucher), id, fila.nombre); }catch(e){ alert('No se pudo leer el voucher.'); }
 }
 async function kioscoEntregar(id, entregado){
   try{
