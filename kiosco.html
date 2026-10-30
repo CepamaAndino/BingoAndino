@@ -221,7 +221,7 @@ function fotoPorNombre(nombre){
   if(/mango|maracuya/.test(n)) return f('mas-mango-600');
   if(/frutos|bosque/.test(n)) return f('mas-frutos-bosque-600');
   if(/cachantun|agua/.test(n)&&chica) return f(/s\/ ?gas|sin gas|natural/.test(n)?'cachantun-singas-600':'cachantun-gas-600');
-  if(/lipton|ice ?tea/.test(n)) return f('lipton-limon');
+  if(/lipton|ice ?tea/.test(n)) return f(/durazno/.test(n)?'lipton-durazno':'lipton-limon');
   if(/vaso/.test(n)) return f('vaso');
   if(/latas? (de )?bebidas?|bebidas? (en )?latas?/.test(n)) return f('latas-bebidas');
   if(/corea|bong|uva/.test(n)) return f('jugo-corea');
