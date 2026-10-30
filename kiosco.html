@@ -281,8 +281,8 @@ function fotoPorNombre(nombre){
   if(/citrus/.test(n)) return f('latas-citrus');
   if(/coco ?palm|lata corea/.test(n)) return f('coco-palm-lata');
   // Ice Talk por sabor (bolsa + vaso)
-  if(/granada/.test(n)) return f('icetalk-granada');
-  if(/limonada azul|blue lemon/.test(n)) return f('icetalk-limonada-azul');
+  if(/granada|pomegranate/.test(n)) return f('icetalk-granada');
+  if(/limonada azul|blue ?lemon/.test(n)) return f('icetalk-limonada-azul');
   if(/arandano|blueberry/.test(n)) return f('icetalk-arandano');
   if(/uva verde|green grape/.test(n)) return f('icetalk-uva-verde');
   if(/sandia|watermelon/.test(n)) return f('icetalk-sandia');
@@ -295,7 +295,7 @@ function fotoPorNombre(nombre){
     if(/pepsi/.test(n)&&/zero|cero/.test(n)) return f('pepsi-zero-lata');
     if(/pepsi/.test(n)&&/lata|350/.test(n)) return f('pepsi-lata');
   }
-  if(/bolsa|ice ?talk/.test(n)) return f('jugo-bolsa-corea-v2');
+  if(/bolsa|ice ?talk|jugo corean/.test(n)) return f('jugo-bolsa-corea-v2');
   if(/kem/.test(n)) return f('kem-xtreme-15');
   if(/7 ?up/.test(n)) return f('7up-15');
   if(/ginger|canada dry/.test(n)) return f('ginger-ale-zero-15');
