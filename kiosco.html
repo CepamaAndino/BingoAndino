@@ -69,7 +69,7 @@ aside small{display:block;text-align:center;color:var(--mute);font-size:17px;mar
 .resumen{background:var(--bg);border:2px solid var(--line);border-radius:16px;padding:14px 20px;margin:16px 0;font-size:22px;line-height:1.5}
 .resumen b{font-size:32px}
 .nl{display:block;font-size:24px;font-weight:800;margin:6px 0 8px}.nl small{font-weight:600;color:var(--mute);font-size:18px}
-#nombre{width:100%;height:68px;border:3px solid var(--navy);border-radius:14px;padding:0 18px;font-size:28px;font-family:inherit;color:var(--ink);user-select:text;-webkit-user-select:text}
+#nombre,.wspbox{width:100%;height:68px;border:3px solid var(--navy);border-radius:14px;padding:0 18px;font-size:28px;font-family:inherit;color:var(--ink);user-select:text;-webkit-user-select:text}
 .pays{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0}
 .pay{background:#fff;border:3px solid var(--navy);border-radius:20px;padding:30px 20px;text-align:center}
 .pay .ic{font-size:70px}.pay .h{font-size:32px;font-weight:900;margin:6px 0}.pay .d{font-size:19px;color:var(--mute)}
@@ -144,6 +144,9 @@ aside small{display:block;text-align:center;color:var(--mute);font-size:17px;mar
 .fin-new{display:block;margin:18px auto 0;border:2px solid var(--navy);border-radius:12px;padding:14px 40px;font-size:20px;font-weight:800;background:#fff;color:var(--navy)}
 @media(max-width:1000px){.fin-top,.fin-mid,.fin-pasos{grid-template-columns:1fr}.fin-pasos div+div{border-left:0;border-top:2px solid var(--line);padding-top:10px;margin-top:6px}.fin-dg{grid-template-columns:1fr}.fin-qr{display:none}.fin-dat,.fin-efe{order:-1}.fin-h{flex-wrap:wrap}.fin-h h4{white-space:nowrap}.tabla button{grid-template-columns:96px minmax(0,1fr) 22px;font-size:15px}}
 @media(max-width:600px){header{padding:8px 12px}.brand{gap:10px}.brand svg{width:38px;height:38px}.brand h1{font-size:28px}.brand p{font-size:14px}.logos .sep,.logos img+.sep+img{display:none}.logos img{height:48px}.fs{display:none}}
+.wspbox{display:flex;align-items:center;padding:0;overflow:hidden;margin-bottom:6px}
+.wspbox span{background:#eef2fb;height:100%;display:flex;align-items:center;padding:0 16px;font-size:28px;font-weight:800;border-right:2px solid var(--line)}
+.wspbox input{flex:1;min-width:0;height:100%;border:0;outline:0;padding:0 16px;font-size:30px;font-family:inherit;font-weight:700;letter-spacing:2px;color:var(--ink);user-select:text;-webkit-user-select:text}
 </style>
 </head>
 <body>
@@ -180,6 +183,8 @@ aside small{display:block;text-align:center;color:var(--mute);font-size:17px;mar
   <div class="resumen" id="resumen2"></div>
   <label class="nl" for="nombre">¿A nombre de quién? <small>(opcional)</small></label>
   <input id="nombre" type="text" maxlength="40" autocomplete="off" placeholder="Escribe tu nombre">
+  <label class="nl" for="wsp">Tu WhatsApp <small>(te avisamos cuando tu pedido esté listo)</small></label>
+  <div class="wspbox"><span>+56 9</span><input id="wsp" type="tel" inputmode="numeric" maxlength="9" autocomplete="off" placeholder="1234 5678" oninput="this.value=this.value.replace(/\D/g,'').slice(0,8);if(this.value.length===8)$('err2').innerHTML=''"></div>
   <div id="err2"></div>
   <div class="pays">
     <button class="pay" onclick="crear('transferencia')"><div class="ic">🏦</div><div class="h">Transferencia</div><div class="d">Te mostramos los datos y un QR</div></button>
@@ -363,13 +368,16 @@ function vaciar(){qty={};render();}
 /* ---------- pasos ---------- */
 function ver(n){['v1','v2','v3'].forEach((id,i)=>$(id).classList.toggle('hidden',i+1!==n));window.scrollTo(0,0);renderBarra();tocado();}
 function lineasTexto(){return items().filter(it=>(qty[it.k]||0)>0).map(it=>`${qty[it.k]} × ${esc(it.nombre)}`).join(' · ');}
-function irPagar(){ if(!cuenta())return; $('err2').innerHTML=''; $('nombre').value='';
+function irPagar(){ if(!cuenta())return; $('err2').innerHTML=''; $('nombre').value=''; $('wsp').value='';
   $('resumen2').innerHTML=`${lineasTexto()}<br>Total: <b>${clp(total())}</b>`; ver(2); }
 function volver(){ ver(1); }
 async function crear(metodo){
-  if(enviando)return; enviando=true; $('err2').innerHTML='<div class="load" style="padding:14px">Generando tu código…</div>';
+  if(enviando)return;
+  const wsp=$('wsp').value.replace(/\D/g,'');
+  if(wsp.length!==8){ $('err2').innerHTML='<div class="err">Escribe tu WhatsApp (8 números después del +56 9) para avisarte cuando esté listo.</div>'; $('wsp').focus(); return; }
+  enviando=true; $('err2').innerHTML='<div class="load" style="padding:14px">Generando tu código…</div>';
   try{
-    const payload={nombre:$('nombre').value.trim(),sueltos:qty.sueltos||0,sets:qty.sets||0,metodo,items:productos.filter(p=>qty[p.id]).map(p=>({id:p.id,cantidad:qty[p.id]}))};
+    const payload={whatsapp:'569'+wsp,nombre:$('nombre').value.trim(),sueltos:qty.sueltos||0,sets:qty.sets||0,metodo,items:productos.filter(p=>qty[p.id]).map(p=>({id:p.id,cantidad:qty[p.id]}))};
     const r=await callBackend('kioscoCrear',payload);
     ultimoPedido=r; mostrarCodigo(r); 
   }catch(e){ $('err2').innerHTML=`<div class="err">${esc(e.message)}</div>`; if(/stock/i.test(e.message)) cargarCatalogo(true); }
@@ -394,7 +402,7 @@ function mostrarCodigo(r){
 function copiarTodo(){ const r=ultimoPedido||{};
   copiar('PATRICIA BRAVO ALCAINO\nRUT: 16.859.492-5\nBanco Estado\nCuenta Corriente\nN° Cuenta: 33000074697\nEmail: cepama@colegioandino.cl'
     +(r.codigo?'\nMonto: '+clp(r.total)+'\nMensaje: '+r.codigo+' Bingo Andino':''),'✅ Todos los datos copiados'); }
-function nueva(){ $('nombre').value='';qty={};ultimoPedido=null;ver(1);render();cargarCatalogo(true); }
+function nueva(){ $('nombre').value=''; $('wsp').value='';qty={};ultimoPedido=null;ver(1);render();cargarCatalogo(true); }
 async function copiar(t,msg){ try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()} toast(msg||('✅ Copiado: '+t)); tocado(); }
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2200);}
 function pantallaCompleta(){const d=document.documentElement;(d.requestFullscreen||d.webkitRequestFullscreen||function(){}).call(d);}

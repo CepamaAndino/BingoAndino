@@ -1839,14 +1839,37 @@ function kioscoFila(r){
            <button class="r" onclick="kioscoAnular('${r.id}')">✖ Anular</button>`;
   } else if(r.estado==='pagado'){
     tag=`<span class="kk-tag" style="background:#cfd8ff;">💳 Pagado · por entregar</span>`;
-    acc = `<button class="b" onclick="kioscoReimprimir('${r.id}')">🖨️ Reimprimir</button><button class="v" onclick="kioscoEntregar('${r.id}',true)">📦 Marcar entregado</button>`;
+    const av = kioscoAvisados()[r.id];
+    acc = `<button class="b" onclick="kioscoReimprimir('${r.id}')">🖨️ Reimprimir</button>`
+        + (kioscoWspUrl(r) ? `<button onclick="kioscoAvisar('${r.id}')" style="background:${av?'#d9f2e1':'#25D366'};color:${av?'#1b5e32':'#fff'};">${av?'✓ Avisado (reenviar)':'💬 Avisar por WhatsApp'}</button>` : '')
+        + `<button class="v" onclick="kioscoEntregar('${r.id}',true)">📦 Marcar entregado</button>`;
   } else if(r.estado==='entregado'){
     cls='ent'; tag=`<span class="kk-tag" style="background:#9fd6b0;">✔ Entregado</span>`;
     acc = `<button class="b" onclick="kioscoReimprimir('${r.id}')">🖨️</button><button onclick="kioscoEntregar('${r.id}',false)">↩ Deshacer</button>`;
   } else { tag=`<span class="kk-tag" style="background:#ddd;">Anulado</span>`; }
   return `<div class="kk-row ${cls}"><div class="kk-cod">${escapeHtml(r.id)}</div>
-    <div class="kk-det">${tag}${r.nombre ? '<b>'+escapeHtml(r.nombre)+'</b> · ' : ''}<small>${hora}${r.estado==='pendiente' ? ' · '+elegido : ''}</small><br>${escapeHtml(r.resumen)}</div>
+    <div class="kk-det">${tag}${r.nombre ? '<b>'+escapeHtml(r.nombre)+'</b> · ' : ''}${r.whatsapp ? '📱 +'+escapeHtml(r.whatsapp)+' · ' : ''}<small>${hora}${r.estado==='pendiente' ? ' · '+elegido : ''}</small><br>${escapeHtml(r.resumen)}</div>
     <div class="kk-monto">$${Number(r.total).toLocaleString('es-CL')}</div><div class="kk-acc">${acc}</div></div>`;
+}
+/* ---- aviso por WhatsApp (abre WhatsApp con el mensaje listo; solo se aprieta Enviar) ---- */
+function kioscoWspUrl(r){
+  let n = String(r.whatsapp||'').replace(/\D/g,'');
+  if(n.length===8) n='569'+n; else if(n.length===9) n='56'+n;
+  if(n.length!==11) return '';
+  const nom = String(r.nombre||'').trim().split(' ')[0];
+  const msg = '¡Hola'+(nom?' '+nom:'')+'! 🎉 Tu pedido *'+r.id+'* del Bingo Andino ya está *pagado y listo para retirar* en la caja.\n'
+    + (r.resumen ? 'Detalle: '+r.resumen+'\n' : '') + 'Total: $'+Number(r.total||0).toLocaleString('es-CL')+'\n\n'
+    + 'Muestra este mensaje o di tu código en la caja. ¡Gracias por apoyar! 💛\nCEPAMA · Colegio Andino Montessori';
+  return 'https://wa.me/'+n+'?text='+encodeURIComponent(msg);
+}
+function kioscoAvisados(){ try{ return JSON.parse(localStorage.getItem('kkAvisados')||'{}'); }catch(e){ return {}; } }
+function kioscoAvisar(id){
+  const r = kioscoRows.find(x=>x.id===id); if(!r) return;
+  const url = kioscoWspUrl(r);
+  if(!url){ alert('Este pedido no tiene un WhatsApp válido.'); return; }
+  window.open(url, '_blank');
+  try{ const a = kioscoAvisados(); a[id]=1; localStorage.setItem('kkAvisados', JSON.stringify(a)); }catch(e){}
+  kioscoRender();
 }
 function kioscoImprimir(v, id, nombre){
   v.comprador = 'Pedido '+id+(nombre ? ' · '+nombre : '');
@@ -1858,6 +1881,8 @@ async function kioscoConfirmar(id, metodo){
   if(!confirm('¿Confirmas que el pago de '+id+' ($'+Number(fila.total).toLocaleString('es-CL')+') llegó '+(metodo==='efectivo'?'en EFECTIVO':'por TRANSFERENCIA')+'?\n\nSe asignarán los cartones y se imprimirá el voucher.')) return;
   try{
     const r = await callBackend('kioscoConfirmar', {password: adminPassword, id, metodo});
+    // primero se abre WhatsApp con el aviso (antes de imprimir, para que el navegador no lo bloquee)
+    if(kioscoWspUrl(fila)){ fila.estado='pagado'; kioscoAvisar(id); }
     kioscoImprimir(r.voucher, id, fila.nombre);
     kioscoLoad(); loadPurchases();
   }catch(err){ alert('No se pudo confirmar: '+err.message); kioscoLoad(); }
