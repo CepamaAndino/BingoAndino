@@ -209,7 +209,7 @@ function fotoPorNombre(nombre){
   // formatos grandes y 600cc (pedido CCU) — van primero para no confundirse con las latas
   const grande=/1[,.][56]|litro|lts/.test(n), chica=/600/.test(n);
   if(/citrus/.test(n)) return f('latas-citrus');
-  if(/bolsa|ice ?talk/.test(n)) return f('jugo-bolsa-corea');
+  if(/bolsa|ice ?talk/.test(n)) return f('jugo-bolsa-corea-v2');
   if(/kem/.test(n)) return f('kem-xtreme-15');
   if(/7 ?up/.test(n)) return f('7up-15');
   if(/ginger|canada dry/.test(n)) return f('ginger-ale-zero-15');
