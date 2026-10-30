@@ -206,6 +206,20 @@ function categoria(p){ return /caf[eé]|(^|\s)t[eé](\s|$)|chocolate|leche|sopai
 function fotoPorNombre(nombre){
   const n=String(nombre||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const f=x=>'img/productos/'+x+'.webp';
+  // formatos grandes y 600cc (pedido CCU) — van primero para no confundirse con las latas
+  const grande=/1[,.][56]|litro|lts/.test(n), chica=/600/.test(n);
+  if(/citrus/.test(n)) return f('latas-citrus');
+  if(/kem/.test(n)) return f('kem-xtreme-15');
+  if(/7 ?up/.test(n)) return f('7up-15');
+  if(/ginger|canada dry/.test(n)) return f('ginger-ale-zero-15');
+  if(/pepsi/.test(n)&&grande) return f(/zero|cero/.test(n)?'pepsi-zero-15':'pepsi-15');
+  if(/crush/.test(n)&&grande) return f('crush-15');
+  if(/manzana/.test(n)) return f('mas-manzana-16');
+  if(/pera/.test(n)) return f('mas-pera-16');
+  if(/pina/.test(n)) return f('mas-pina-600');
+  if(/mango|maracuya/.test(n)) return f('mas-mango-600');
+  if(/frutos|bosque/.test(n)) return f('mas-frutos-bosque-600');
+  if(/cachantun|agua/.test(n)&&chica) return f(/s\/ ?gas|sin gas|natural/.test(n)?'cachantun-singas-600':'cachantun-gas-600');
   if(/lipton|ice ?tea/.test(n)) return f('lipton-limon');
   if(/vaso/.test(n)) return f('vaso');
   if(/latas? (de )?bebidas?|bebidas? (en )?latas?/.test(n)) return f('latas-bebidas');
