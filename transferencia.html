@@ -1,19 +1,41 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Datos para transferir · Bingo Andino</title>
-<style>*{box-sizing:border-box}body{margin:0;font-family:system-ui,Arial,sans-serif;background:#0d1b4a;color:#12214f;padding:16px}
-.c{max-width:460px;margin:0 auto}h1{color:#ffd35c;text-align:center;font-size:24px;margin:10px 0 4px}p.s{color:#cfd8ff;text-align:center;margin:0 0 16px}
-.box{background:#fff8e6;border:4px solid #ffd35c;border-radius:20px;padding:6px 18px}
-.r{padding:12px 0;border-bottom:1px solid #e8dcb8}.r:last-child{border:0}.r span{display:block;color:#6b6540;font-size:13px}.r b{font-size:19px;word-break:break-all}
-button{width:100%;margin-top:14px;padding:16px;border:0;border-radius:14px;background:#b3141f;color:#fff;font-size:18px;font-weight:700}
-.ok{text-align:center;color:#9ff0b0;margin-top:10px;min-height:22px}.n{color:#fff;text-align:center;font-size:14px;margin-top:14px}</style></head><body><div class="c">
-<h1>🏦 Datos para transferir</h1><p class="s">Compra de cartones · Bingo Andino 2026</p>
-<div class="box">
-<div class="r"><span>Nombre</span><b>Patricia Bravo Alcaino</b></div>
-<div class="r"><span>RUT</span><b>16.859.492-5</b></div>
-<div class="r"><span>Banco</span><b>Banco Estado</b></div>
-<div class="r"><span>Tipo de cuenta</span><b>Cuenta Corriente</b></div>
-<div class="r"><span>N° de cuenta</span><b>33000074697</b></div>
-<div class="r"><span>Email</span><b>cepama@colegioandino.cl</b></div></div>
-<button id="b">📋 Copiar todos los datos</button><div class="ok" id="ok"></div>
-<div class="n">En el mensaje de la transferencia pon el nombre del alumno/a y su curso.</div></div>
-<script>const T='PATRICIA BRAVO ALCAINO\nRUT: 16.859.492-5\nBanco Estado\nCuenta Corriente\nN° Cuenta: 33000074697\nEmail: cepama@colegioandino.cl';
-document.getElementById('b').onclick=async()=>{try{await navigator.clipboard.writeText(T)}catch(e){const t=document.createElement('textarea');t.value=T;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove()}document.getElementById('ok').textContent='✅ Datos copiados'};</script></body></html>
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Datos para transferir · Bingo Andino</title>
+<style>
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{font-family:"Segoe UI",system-ui,Arial,sans-serif;background:#0a1f4d;color:#10224f;min-height:100vh}
+header{background:linear-gradient(90deg,#0a1f4d,#0d2a63);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+header h1{color:#fff;font-size:26px;line-height:1;font-weight:900}header h1 b{color:#ffc83d}
+header p{color:#dbe6ff;font-size:14px;margin-top:3px}
+header img{height:56px;border-radius:10px;background:#fff}
+.c{max-width:480px;margin:0 auto;padding:18px 16px 32px}
+.t{color:#ffc83d;text-align:center;font-size:24px;font-weight:900;margin-bottom:4px}
+.s{color:#cfd8ff;text-align:center;font-size:15px;margin-bottom:16px}
+.box{background:#fff8e6;border:4px solid #ffc83d;border-radius:20px;padding:4px 16px}
+.r{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;background:none;border:0;border-bottom:1px solid #e8dcb8;padding:13px 0;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.r:last-child{border:0}.r i{font-style:normal;color:#6b6540;font-size:13px;display:block}.r b{font-size:18px;word-break:break-all;display:block}.r span{font-size:22px}
+.all{width:100%;margin-top:14px;padding:18px;border:0;border-radius:16px;background:#1f9d4d;color:#fff;font-size:21px;font-weight:800;cursor:pointer}
+.all:active{background:#177a3a}
+.ok{text-align:center;color:#9ff0b0;margin-top:12px;min-height:24px;font-weight:700}
+.n{color:#fff;text-align:center;font-size:15px;margin-top:10px;line-height:1.5}
+</style></head><body>
+<header>
+  <div><h1>BINGO <b>ANDINO</b></h1><p>Datos para transferir</p></div>
+  <img src="img/logo-cepama.png" alt="CEPAMA">
+</header>
+<div class="c">
+  <div class="t">🏦 Transferencia</div>
+  <div class="s">Toca un dato para copiarlo, o copia todo de una vez</div>
+  <div class="box" id="box"></div>
+  <button class="all" id="all">📋 Copiar todos los datos</button>
+  <div class="ok" id="ok"></div>
+  <div class="n">En el mensaje de la transferencia pon tu <b>código de compra</b> (por ejemplo K-0007) o el nombre del alumno/a y su curso.</div>
+</div>
+<script>
+const D=[['Nombre','Patricia Bravo Alcaino'],['RUT','16.859.492-5'],['Banco','Banco Estado'],['Tipo de cuenta','Cuenta Corriente'],['N° de cuenta','33000074697'],['Email','cepama@colegioandino.cl']];
+const T='PATRICIA BRAVO ALCAINO\nRUT: 16.859.492-5\nBanco Estado\nCuenta Corriente\nN° Cuenta: 33000074697\nEmail: cepama@colegioandino.cl';
+async function cp(t,msg){try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()}document.getElementById('ok').textContent=msg}
+document.getElementById('box').innerHTML=D.map((d,i)=>`<button class="r" data-i="${i}"><div><i>${d[0]}</i><b>${d[1]}</b></div><span>📋</span></button>`).join('');
+document.querySelectorAll('.r').forEach(b=>b.onclick=()=>{const d=D[b.dataset.i];cp(d[1],'✅ Copiado: '+d[1])});
+document.getElementById('all').onclick=()=>cp(T,'✅ Todos los datos copiados');
+</script></body></html>
