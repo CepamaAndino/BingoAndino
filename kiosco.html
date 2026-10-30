@@ -95,6 +95,18 @@ aside small{display:block;text-align:center;color:var(--mute);font-size:17px;mar
 .fs{position:fixed;right:8px;bottom:8px;width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,.08);font-size:22px;z-index:5}
 .hidden{display:none!important}
 @media(max-width:1000px){.wrap{grid-template-columns:1fr}aside{border-left:0;border-top:2px solid var(--line);position:static;height:auto}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.two,.pays{grid-template-columns:1fr}header{padding:10px 14px}.left{padding:16px 14px}}
+/* celular: barra fija con total y botón Pagar (no hay que bajar hasta el final) */
+.barra{display:none}
+@media(max-width:1000px){
+ .barra{position:fixed;left:0;right:0;bottom:0;z-index:8;background:#fff;border-top:2px solid var(--line);box-shadow:0 -6px 20px rgba(13,42,99,.15);padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px}
+ .barra.off{display:none}
+ .barra .info{flex:1;min-width:0}
+ .barra .info b{display:block;font-size:22px;font-weight:900}
+ .barra .info span{font-size:15px;color:var(--mute)}
+ .barra button{height:56px;border-radius:14px;background:var(--green);color:#fff;font-size:21px;font-weight:800;padding:0 22px;white-space:nowrap}
+ body.conbarra{padding-bottom:90px}
+ body.conbarra .fs{bottom:96px}
+}
 </style>
 </head>
 <body>
@@ -161,6 +173,7 @@ aside small{display:block;text-align:center;color:var(--mute);font-size:17px;mar
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="barra off" id="barra"><div class="info"><b id="bTot">$0</b><span id="bCnt">0 productos</span></div><button onclick="irPagar()">Pagar →</button></div>
 <button class="fs" onclick="pantallaCompleta()" title="Pantalla completa">⛶</button>
 
 <script>
@@ -285,7 +298,10 @@ function renderCart(){
   $('total').textContent=clp(total());
   $('go').disabled=!l.length;
 }
-function render(){renderGrid();renderCart();}
+function render(){renderGrid();renderCart();renderBarra();}
+function renderBarra(){const n=cuenta(), on=n>0&&!$('v1').classList.contains('hidden');
+  $('barra').classList.toggle('off',!on); document.body.classList.toggle('conbarra',on);
+  $('bTot').textContent=clp(total()); $('bCnt').textContent='🛒 '+n+(n===1?' producto':' productos');}
 function mas(k){const it=items().find(x=>x.k===k);if(!it)return;const q=qty[k]||0;
   if(it.stock!==null&&it.stock!==undefined&&q>=it.stock){toast(it.stock===0?'Producto sin stock':'No queda más stock de este producto');return;}
   if(q>=it.max){toast('Máximo '+it.max+' por compra. Para más, consulta en la caja.');return;}
@@ -296,7 +312,7 @@ function quitar(k){delete qty[k];render();tocado();}
 function vaciar(){qty={};render();}
 
 /* ---------- pasos ---------- */
-function ver(n){['v1','v2','v3'].forEach((id,i)=>$(id).classList.toggle('hidden',i+1!==n));window.scrollTo(0,0);tocado();}
+function ver(n){['v1','v2','v3'].forEach((id,i)=>$(id).classList.toggle('hidden',i+1!==n));window.scrollTo(0,0);renderBarra();tocado();}
 function lineasTexto(){return items().filter(it=>(qty[it.k]||0)>0).map(it=>`${qty[it.k]} × ${esc(it.nombre)}`).join(' · ');}
 function irPagar(){ if(!cuenta())return; $('err2').innerHTML=''; $('nombre').value='';
   $('resumen2').innerHTML=`${lineasTexto()}<br>Total: <b>${clp(total())}</b>`; ver(2); }
