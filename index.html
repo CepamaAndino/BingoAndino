@@ -264,6 +264,8 @@
   .kk-acc{ display:flex; gap:6px; flex-wrap:wrap; }
   .kk-acc button{ padding:9px 12px; border-radius:10px; border:0; font-weight:800; font-size:13px; color:#fff; cursor:pointer; background:#8a8a8a; }
   .kk-acc .v{ background:#2e9e5b; } .kk-acc .r{ background:#b3141f; } .kk-acc .b{ background:#1c2550; }
+  .kk-mesa{ display:inline-block; background:#1c2550; color:#fff; border-radius:8px; padding:3px 10px; font-size:15px; font-weight:900; margin-right:6px; }
+  .kk-mesa.pres{ background:#6b6540; }
   .kk-vuelto{ display:inline-block; margin-top:6px; background:#fff3cd; border:2px solid #ffc83d; border-radius:10px; padding:6px 12px; font-size:16px; font-weight:700; }
   .kk-vuelto b{ font-size:20px; color:#b3141f; }
   .kk-vuelto.sin{ background:#e7f6ec; border-color:#9fd6b0; color:#14532d; }
@@ -1821,7 +1823,7 @@ function kioscoRender(){
   document.getElementById('kkChips').innerHTML = chips.map(c=>`<button type="button" class="${kioscoFiltro===c[0]?'on':''}" onclick="kioscoSetFiltro('${c[0]}')">${c[1]} (${c[2]})</button>`).join('');
   let lista = kioscoRows;
   const txt = (document.getElementById('kkBuscar').value||'').trim().toLowerCase();
-  if(buscar && !/^\d+$/.test(buscar)) lista = lista.filter(r=>String(r.nombre||'').toLowerCase().includes(txt) || String(r.id).toLowerCase().includes(txt));
+  if(buscar && !/^\d+$/.test(buscar)) lista = lista.filter(r=>String(r.nombre||'').toLowerCase().includes(txt) || String(r.mesa||'').toLowerCase().includes(txt) || String(r.id).toLowerCase().includes(txt));
   else if(buscar) lista = lista.filter(r=>String(r.id).toUpperCase().replace('K-','').replace(/^0+/,'').includes(buscar.replace(/^0+/,'')) );
   else if(kioscoFiltro==='cobrar') lista = cobrar;
   else if(kioscoFiltro==='entregar') lista = entregar;
@@ -1835,7 +1837,7 @@ function kioscoVuelto(r){
   if(!pc || r.metodo!=='efectivo') return '';
   const vu = pc - tot;
   return vu>0
-    ? `<div class="kk-vuelto">💵 Paga con $${pc.toLocaleString('es-CL')} → <b>LLEVAR VUELTO: $${vu.toLocaleString('es-CL')}</b></div>`
+    ? `<div class="kk-vuelto">💵 Paga con $${pc.toLocaleString('es-CL')} → <b>LLEVAR VUELTO: $${vu.toLocaleString('es-CL')}</b>${r.mesa && r.mesa!=='Presencial' ? ' a la <b>'+escapeHtml(r.mesa)+'</b>' : ''}</div>`
     : `<div class="kk-vuelto sin">💵 Paga justo · sin vuelto</div>`;
 }
 function kioscoFila(r){
@@ -1859,7 +1861,7 @@ function kioscoFila(r){
     acc = `<button class="b" onclick="kioscoReimprimir('${r.id}')">🖨️</button><button onclick="kioscoEntregar('${r.id}',false)">↩ Deshacer</button>`;
   } else { tag=`<span class="kk-tag" style="background:#ddd;">Anulado</span>`; }
   return `<div class="kk-row ${cls}"><div class="kk-cod">${escapeHtml(r.id)}</div>
-    <div class="kk-det">${tag}${r.nombre ? '<b>'+escapeHtml(r.nombre)+'</b> · ' : ''}${r.whatsapp ? '📱 +'+escapeHtml(r.whatsapp)+' · ' : ''}<small>${hora}${r.estado==='pendiente' ? ' · '+elegido : ''}</small><br>${escapeHtml(r.resumen)}${r.estado==='pendiente' ? kioscoVuelto(r) : ''}</div>
+    <div class="kk-det">${tag}${r.mesa ? '<span class="kk-mesa'+(r.mesa==='Presencial'?' pres':'')+'">'+(r.mesa==='Presencial'?'🚶 ':'🪑 ')+escapeHtml(r.mesa)+'</span>' : ''}${r.nombre ? '<b>'+escapeHtml(r.nombre)+'</b> · ' : ''}${r.whatsapp ? '📱 +'+escapeHtml(r.whatsapp)+' · ' : ''}<small>${hora}${r.estado==='pendiente' ? ' · '+elegido : ''}</small><br>${escapeHtml(r.resumen)}${r.estado==='pendiente' ? kioscoVuelto(r) : ''}</div>
     <div class="kk-monto">$${Number(r.total).toLocaleString('es-CL')}</div><div class="kk-acc">${acc}</div></div>`;
 }
 /* ---- aviso por WhatsApp (abre WhatsApp con el mensaje listo; solo se aprieta Enviar) ---- */
@@ -1882,8 +1884,8 @@ function kioscoAvisar(id){
   try{ const a = kioscoAvisados(); a[id]=1; localStorage.setItem('kkAvisados', JSON.stringify(a)); }catch(e){}
   kioscoRender();
 }
-function kioscoImprimir(v, id, nombre, pagaCon){
-  v.comprador = 'Pedido '+id+(nombre ? ' · '+nombre : '');
+function kioscoImprimir(v, id, nombre, pagaCon, mesa){
+  v.comprador = 'Pedido '+id+(nombre ? ' · '+nombre : '')+(mesa ? ' · '+mesa.toUpperCase() : '');
   v.montoRecibido = null; v.vuelto = null;
   // pago en efectivo: el voucher muestra con cuánto pagó y el vuelto
   if(v.metodoPago==='efectivo' && Number(pagaCon)>=Number(v.montoTotal)){ v.montoRecibido = Number(pagaCon); v.vuelto = Number(pagaCon)-Number(v.montoTotal); }
@@ -1896,14 +1898,14 @@ async function kioscoConfirmar(id, metodo){
     const r = await callBackend('kioscoConfirmar', {password: adminPassword, id, metodo});
     // primero se abre WhatsApp con el aviso (antes de imprimir, para que el navegador no lo bloquee)
     if(kioscoWspUrl(fila)){ fila.estado='pagado'; kioscoAvisar(id); }
-    kioscoImprimir(r.voucher, id, fila.nombre, fila.pagaCon);
+    kioscoImprimir(r.voucher, id, fila.nombre, fila.pagaCon, fila.mesa);
     kioscoLoad(); loadPurchases();
   }catch(err){ alert('No se pudo confirmar: '+err.message); kioscoLoad(); }
 }
 function kioscoReimprimir(id){
   const fila = kioscoRows.find(r=>r.id===id);
   if(!fila || !fila.voucher){ alert('Este pedido no tiene voucher guardado.'); return; }
-  try{ kioscoImprimir(JSON.parse(fila.voucher), id, fila.nombre, fila.pagaCon); }catch(e){ alert('No se pudo leer el voucher.'); }
+  try{ kioscoImprimir(JSON.parse(fila.voucher), id, fila.nombre, fila.pagaCon, fila.mesa); }catch(e){ alert('No se pudo leer el voucher.'); }
 }
 async function kioscoEntregar(id, entregado){
   try{

@@ -159,6 +159,10 @@ aside small{display:block;text-align:center;color:var(--mute);font-size:17px;mar
 .fin-new{display:block;margin:18px auto 0;border:2px solid var(--navy);border-radius:12px;padding:14px 40px;font-size:20px;font-weight:800;background:#fff;color:var(--navy)}
 @media(max-width:1000px){.fin-top,.fin-mid,.fin-pasos{grid-template-columns:1fr}.fin-pasos div+div{border-left:0;border-top:2px solid var(--line);padding-top:10px;margin-top:6px}.fin-dg{grid-template-columns:1fr}.fin-qr{display:none}.fin-dat,.fin-efe{order:-1}.fin-h{flex-wrap:wrap}.fin-h h4{white-space:nowrap}.tabla button{grid-template-columns:96px minmax(0,1fr) 22px;font-size:15px}}
 @media(max-width:600px){header{padding:8px 12px}.brand{gap:10px}.brand svg{width:38px;height:38px}.brand h1{font-size:28px}.brand p{font-size:14px}.logos .sep,.logos img+.sep+img{display:none}.logos img{height:48px}.fs{display:none}}
+.dest{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+.dest button{min-height:96px;padding:6px;border-radius:16px;border:3px solid var(--navy);background:#fff;font-size:26px;font-weight:900;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
+.dest button span{font-size:30px}.dest button small{font-size:15px;font-weight:700;color:var(--mute)}
+.dest button.on{background:var(--navy);color:#fff}.dest button.on small{color:#cfd8ff}
 .wspbox{display:flex;align-items:center;padding:0;overflow:hidden;margin-bottom:6px}
 .wspbox span{background:#eef2fb;height:100%;display:flex;align-items:center;padding:0 16px;font-size:28px;font-weight:800;border-right:2px solid var(--line)}
 .wspbox input{flex:1;min-width:0;height:100%;border:0;outline:0;padding:0 16px;font-size:30px;font-family:inherit;font-weight:700;letter-spacing:2px;color:var(--ink);user-select:text;-webkit-user-select:text}
@@ -203,6 +207,12 @@ aside small{display:block;text-align:center;color:var(--mute);font-size:17px;mar
   <input id="nombre" type="text" maxlength="40" autocomplete="off" placeholder="Escribe tu nombre">
   <label class="nl" for="wsp">Tu WhatsApp <small>(te avisamos cuando tu pedido esté listo)</small></label>
   <div class="wspbox"><span>+56 9</span><input id="wsp" type="tel" inputmode="numeric" maxlength="9" autocomplete="off" placeholder="1234 5678" oninput="this.value=this.value.replace(/\D/g,'').slice(0,8);if(this.value.length===8)$('err2').innerHTML=''"></div>
+  <label class="nl">¿Dónde te entregamos tu pedido? <small>(obligatorio)</small></label>
+  <div class="dest">
+    <button type="button" id="dMesa" onclick="elegirDestino('mesa')"><span>🪑</span>En mi mesa</button>
+    <button type="button" id="dPres" onclick="elegirDestino('presencial')"><span>🚶</span>Presencial<small>Lo retiro en la caja</small></button>
+  </div>
+  <div id="mesaBox" class="hidden"><div class="wspbox"><span>Mesa N°</span><input id="mesaNum" type="text" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="Ej: 12" oninput="this.value=this.value.replace(/[^0-9A-Za-z]/g,'').slice(0,4);if(this.value)$('err2').innerHTML=''"></div></div>
   <div id="err2"></div>
   <div class="pays">
     <button class="pay" onclick="crear('transferencia')"><div class="ic">🏦</div><div class="h">Transferencia</div><div class="d">Te mostramos los datos y un QR</div></button>
@@ -439,7 +449,18 @@ function vaciar(){qty={};render();}
 /* ---------- pasos ---------- */
 function ver(n){['v1','v2','v3'].forEach((id,i)=>$(id).classList.toggle('hidden',i+1!==n));window.scrollTo(0,0);renderBarra();tocado();}
 function lineasTexto(){return items().filter(it=>(qty[it.k]||0)>0).map(it=>`${qty[it.k]} × ${esc(it.nombre)}`).join(' · ');}
-function irPagar(){ if(!cuenta())return; $('err2').innerHTML=''; $('nombre').value=''; $('wsp').value='';
+let destino='';
+function elegirDestino(d){ destino=d; $('dMesa').classList.toggle('on',d==='mesa'); $('dPres').classList.toggle('on',d==='presencial'); $('mesaBox').classList.toggle('hidden',d!=='mesa'); $('err2').innerHTML=''; if(d==='mesa') $('mesaNum').focus(); tocado(); }
+// devuelve 'Mesa 12' o 'Presencial'; si falta algo, muestra el aviso y devuelve ''
+function lugarEntrega(){
+  if(destino==='presencial') return 'Presencial';
+  const m=$('mesaNum').value.trim();
+  if(destino==='mesa' && m) return 'Mesa '+m;
+  $('err2').innerHTML='<div class="err">'+(destino==='mesa'?'Escribe el número de tu mesa.':'Elige dónde te entregamos tu pedido: en tu mesa o presencial.')+'</div>';
+  if(destino==='mesa') $('mesaNum').focus();
+  return '';
+}
+function irPagar(){ if(!cuenta())return; $('err2').innerHTML=''; $('nombre').value=''; $('wsp').value=''; destino=''; $('mesaNum').value=''; elegirDestino(''); 
   $('resumen2').innerHTML=`${lineasTexto()}<br>Total: <b>${clp(total())}</b>`; ver(2); }
 function volver(){ ver(1); }
 /* ---------- efectivo: con cuánto paga (para llevarle el vuelto) ---------- */
@@ -448,6 +469,7 @@ function opcionesPago(t){ const st=new Set([t]); [5000,10000,20000,50000].forEac
 function abrirEfectivo(){
   const wsp=$('wsp').value.replace(/\D/g,'');
   if(wsp.length!==8){ $('err2').innerHTML='<div class="err">Escribe tu WhatsApp (8 números después del +56 9) para avisarte cuando esté listo.</div>'; $('wsp').focus(); return; }
+  if(!lugarEntrega()) return;
   const t=total(); pagaCon=0; $('mOtro').value=''; $('mErr').innerHTML=''; $('mTot').textContent=clp(t);
   $('mOpts').innerHTML=opcionesPago(t).map(v=>`<button data-v="${v}" onclick="elegirMonto(${v})">${clp(v)}${v===t?'<small>Pago justo, sin vuelto</small>':''}</button>`).join('');
   actualizarVuelto(); $('mEfe').classList.remove('hidden'); tocado();
@@ -475,9 +497,10 @@ async function crear(metodo,pagaConMonto){
   if(enviando)return;
   const wsp=$('wsp').value.replace(/\D/g,'');
   if(wsp.length!==8){ $('err2').innerHTML='<div class="err">Escribe tu WhatsApp (8 números después del +56 9) para avisarte cuando esté listo.</div>'; $('wsp').focus(); return; }
+  const mesa=lugarEntrega(); if(!mesa) return;
   enviando=true; $('err2').innerHTML='<div class="load" style="padding:14px">Generando tu código…</div>';
   try{
-    const payload={whatsapp:'569'+wsp,nombre:$('nombre').value.trim(),sueltos:qty.sueltos||0,sets:qty.sets||0,metodo,pagaCon:metodo==='efectivo'?(pagaConMonto||0):0,items:productos.filter(p=>qty[p.id]).map(p=>({id:p.id,cantidad:qty[p.id]}))};
+    const payload={mesa,whatsapp:'569'+wsp,nombre:$('nombre').value.trim(),sueltos:qty.sueltos||0,sets:qty.sets||0,metodo,pagaCon:metodo==='efectivo'?(pagaConMonto||0):0,items:productos.filter(p=>qty[p.id]).map(p=>({id:p.id,cantidad:qty[p.id]}))};
     const r=await callBackend('kioscoCrear',payload);
     ultimoPedido=r; mostrarCodigo(r); 
   }catch(e){ $('err2').innerHTML=`<div class="err">${esc(e.message)}</div>`; if(/stock/i.test(e.message)) cargarCatalogo(true); }
@@ -487,7 +510,7 @@ function mostrarCodigo(r){
   const transf=r.metodo!=='efectivo';
   $('cod').textContent=r.codigo; $('cod3').textContent=r.codigo;
   $('tot3').textContent=clp(r.total); $('tot3b').textContent=clp(r.total);
-  $('nom3').textContent=r.nombre?('A nombre de: '+r.nombre):'';
+  $('nom3').innerHTML=(r.nombre?('A nombre de: '+esc(r.nombre)+'<br>'):'')+(r.mesa?(r.mesa==='Presencial'?'🚶 Retiro presencial en caja':'🪑 Te lo llevamos a la <b>'+esc(r.mesa)+'</b>'):'');
   $('res3').innerHTML=String(r.resumen||'').split(' · ').filter(Boolean).map(x=>`<div>${esc(x)}</div>`).join('');
   $('blkTransf').classList.toggle('hidden',!transf); $('blkEfe').classList.toggle('hidden',transf);
   const pc=Number(r.pagaCon)||0, vu=pc?(pc-Number(r.total)):0;
@@ -504,7 +527,7 @@ function mostrarCodigo(r){
 function copiarTodo(){ const r=ultimoPedido||{};
   copiar('PATRICIA BRAVO ALCAINO\nRUT: 16.859.492-5\nBanco Estado\nCuenta Corriente\nN° Cuenta: 33000074697\nEmail: cepama@colegioandino.cl'
     +(r.codigo?'\nMonto: '+clp(r.total)+'\nMensaje: '+r.codigo+' Bingo Andino':''),'✅ Todos los datos copiados'); }
-function nueva(){ $('nombre').value=''; $('wsp').value='';qty={};ultimoPedido=null;ver(1);render();cargarCatalogo(true); }
+function nueva(){ destino='';$('mesaNum').value='';$('nombre').value=''; $('wsp').value='';qty={};ultimoPedido=null;ver(1);render();cargarCatalogo(true); }
 async function copiar(t,msg){ try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()} toast(msg||('✅ Copiado: '+t)); tocado(); }
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2200);}
 function pantallaCompleta(){const d=document.documentElement;(d.requestFullscreen||d.webkitRequestFullscreen||function(){}).call(d);}
