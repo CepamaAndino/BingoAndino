@@ -1870,9 +1870,13 @@ function kioscoWspUrl(r){
   if(n.length===8) n='569'+n; else if(n.length===9) n='56'+n;
   if(n.length!==11) return '';
   const nom = String(r.nombre||'').trim().split(' ')[0];
-  const msg = '¡Hola'+(nom?' '+nom:'')+'! 🎉 Tu pedido *'+r.id+'* del Bingo Andino ya está *pagado y listo para retirar* en la caja.\n'
-    + (r.resumen ? 'Detalle: '+r.resumen+'\n' : '') + 'Total: $'+Number(r.total||0).toLocaleString('es-CL')+'\n\n'
-    + 'Muestra este mensaje o di tu código en la caja. ¡Gracias por apoyar! 💛\nCEPAMA · Colegio Andino Montessori';
+  const aMesa = r.mesa && r.mesa!=='Presencial';
+  const vu = (r.metodo==='efectivo' && Number(r.pagaCon)>Number(r.total)) ? Number(r.pagaCon)-Number(r.total) : 0;
+  const msg = '¡Hola'+(nom?' '+nom:'')+'! 🎉 Tu pedido *'+r.id+'* del Bingo Andino ya está *pagado*'
+    + (aMesa ? ' y *va en camino a tu '+r.mesa+'* 🪑' : ' y *listo para retirar* en la caja.') + '\n'
+    + (r.resumen ? 'Detalle: '+r.resumen+'\n' : '') + 'Total: $'+Number(r.total||0).toLocaleString('es-CL')+'\n'
+    + (vu && aMesa ? 'Te llevamos tu vuelto: $'+vu.toLocaleString('es-CL')+'\n' : '') + '\n'
+    + (aMesa ? 'Quédate en tu mesa, ya te lo llevamos. ¡Gracias por apoyar! 💛' : 'Muestra este mensaje o di tu código en la caja. ¡Gracias por apoyar! 💛')+'\nCEPAMA · Colegio Andino Montessori';
   return 'https://wa.me/'+n+'?text='+encodeURIComponent(msg);
 }
 function kioscoAvisados(){ try{ return JSON.parse(localStorage.getItem('kkAvisados')||'{}'); }catch(e){ return {}; } }
