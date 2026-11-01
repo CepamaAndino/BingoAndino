@@ -310,9 +310,9 @@ function precioSets(n){
 }
 const precioSet1=()=>modo==='evento'?12000:9000;
 function icono(n){n=String(n||'').toLowerCase();
-  if(/jugo/.test(n))return'🧃';if(/caf[eé]/.test(n))return'☕';if(/(^|\s)t[eé](\s|$)/.test(n))return'🍵';
+  if(/jugo/.test(n))return'🧃';if(/caf[eé]|mo[ck]+h?a|cap+uc+h?ino|chocolate|marley/.test(n))return'☕';if(/(^|\s)t[eé](\s|$)/.test(n))return'🍵';
   if(/agua/.test(n))return'💧';if(/sopaip|galleta|snack|papas|cabritas|brownie|queque|torta|dulce|completo|empanada|pizza|buka|mix/.test(n))return'🍪';return'🥤';}
-function categoria(p){ if(/raspe/i.test(p.nombre)) return 'cartones'; return /caf[eé]|(^|\s)t[eé](\s|$)|chocolate|leche|sopaip|galleta|snack|papas|cabritas|brownie|queque|torta|dulce|completo|empanada|pizza|buka|mix|vegetal|lipton/i.test(p.nombre)&&!/lipton|lata|jugo|bilz|agua/i.test(p.nombre) ? 'cafeteria':'bebidas'; }
+function categoria(p){ if(/raspe/i.test(p.nombre)) return 'cartones'; return /caf[eé]|(^|\s)t[eé](\s|$)|chocolate|mo[ck]+h?a|cap+uc+h?ino|marley|leche|sopaip|galleta|snack|papas|cabritas|brownie|queque|torta|dulce|completo|empanada|pizza|buka|mix|vegetal|lipton/i.test(p.nombre)&&!/lipton|lata|jugo|bilz|agua/i.test(p.nombre) ? 'cafeteria':'bebidas'; }
 
 /* ---------- fotos: si el producto no trae foto en la planilla (col. D), se busca por nombre en img/productos/ ---------- */
 function fotoPorNombre(nombre){
@@ -359,6 +359,12 @@ function fotoPorNombre(nombre){
   if(/crush|naranja/.test(n)) return f('crush');
   if(/cachantun|agua/.test(n)) return f(/sin gas|natural/.test(n)?'cachantun-singas':(/gas/.test(n)?'cachantun-gas':'cachantun-singas'));
   if(/buka|mix|vegetal/.test(n)) return f('mix-buka');
+  // cafetería caliente
+  if(/mo[ck]+h?a/.test(n)) return f('mocaccino');
+  if(/cap+uc+h?ino/.test(n)) return f('capuccino');
+  if(/chocolate/.test(n)) return f('chocolate-caliente');
+  if(/marley|marlen|instantaneo|liofilizado|sobre/.test(n)) return f('cafe-marley');
+  if(/maquina|endulzado/.test(n)) return f('cafe-maquina');
   if(/(^|\s)cafe/.test(n)) return f('cafe');
   if(/(^|\s)te(\s|$)/.test(n)) return f('te');
   return '';
