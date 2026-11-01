@@ -313,7 +313,7 @@ const precioSet1=()=>modo==='evento'?12000:9000;
 function icono(n){n=String(n||'').toLowerCase();
   if(/jugo/.test(n))return'🧃';if(/caf[eé]|mo[ck]+h?a|cap+uc+h?ino|chocolate|marley/.test(n))return'☕';if(/(^|\s)t[eé](\s|$)/.test(n))return'🍵';
   if(/agua/.test(n))return'💧';if(/sopaip|galleta|snack|papas|cabritas|brownie|queque|torta|dulce|completo|empanada|pizza|buka|mix/.test(n))return'🍪';return'🥤';}
-function categoria(p){ if(/raspe/i.test(p.nombre)) return 'cartones'; return /caf[eé]|(^|\s)t[eé](\s|$)|chocolate|mo[ck]+h?a|cap+uc+h?ino|marley|leche|sopaip|galleta|snack|papas|cabritas|brownie|queque|torta|dulce|completo|empanada|pizza|buka|mix|vegetal|lipton/i.test(p.nombre)&&!/lipton|lata|jugo|bilz|agua/i.test(p.nombre) ? 'cafeteria':'bebidas'; }
+function categoria(p){ if(/rasp[ae]/i.test(p.nombre)) return 'cartones'; return /caf[eé]|(^|\s)t[eé](\s|$)|chocolate|mo[ck]+h?a|cap+uc+h?ino|marley|leche|sopaip|galleta|snack|papas|cabritas|brownie|queque|torta|dulce|completo|empanada|pizza|buka|mix|vegetal|lipton/i.test(p.nombre)&&!/lipton|lata|jugo|bilz|agua/i.test(p.nombre) ? 'cafeteria':'bebidas'; }
 
 /* ---------- fotos: si el producto no trae foto en la planilla (col. D), se busca por nombre en img/productos/ ---------- */
 function fotoPorNombre(nombre){
@@ -321,7 +321,7 @@ function fotoPorNombre(nombre){
   const f=x=>'img/productos/'+x+'.webp';
   // formatos grandes y 600cc (pedido CCU) — van primero para no confundirse con las latas
   const grande=/1[,.][56]|litro|lts/.test(n), chica=/600/.test(n);
-  if(/raspe/.test(n)) return f('raspe-suerte');
+  if(/rasp[ae]/.test(n)) return f('raspe-suerte');
   if(/citrus/.test(n)) return f('latas-citrus');
   if(/coco ?palm|lata corea/.test(n)) return f('coco-palm-lata');
   // Ice Talk por sabor (bolsa + vaso)
