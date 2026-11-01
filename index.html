@@ -264,6 +264,9 @@
   .kk-acc{ display:flex; gap:6px; flex-wrap:wrap; }
   .kk-acc button{ padding:9px 12px; border-radius:10px; border:0; font-weight:800; font-size:13px; color:#fff; cursor:pointer; background:#8a8a8a; }
   .kk-acc .v{ background:#2e9e5b; } .kk-acc .r{ background:#b3141f; } .kk-acc .b{ background:#1c2550; }
+  .kk-vuelto{ display:inline-block; margin-top:6px; background:#fff3cd; border:2px solid #ffc83d; border-radius:10px; padding:6px 12px; font-size:16px; font-weight:700; }
+  .kk-vuelto b{ font-size:20px; color:#b3141f; }
+  .kk-vuelto.sin{ background:#e7f6ec; border-color:#9fd6b0; color:#14532d; }
   .kk-tag{ font-size:11px; font-weight:800; border-radius:99px; padding:2px 9px; margin-right:6px; }
   /* ===== CAJA (venta presencial) ===== */
   .caja-head{ display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
@@ -1827,6 +1830,14 @@ function kioscoRender(){
   document.getElementById('kkList').innerHTML = lista.length ? lista.map(kioscoFila).join('')
     : '<p class="note">'+(buscar ? 'No hay pedidos con ese código.' : 'Nada por aquí por ahora. 🎉')+'</p>';
 }
+function kioscoVuelto(r){
+  const pc = Number(r.pagaCon)||0, tot = Number(r.total)||0;
+  if(!pc || r.metodo!=='efectivo') return '';
+  const vu = pc - tot;
+  return vu>0
+    ? `<div class="kk-vuelto">💵 Paga con $${pc.toLocaleString('es-CL')} → <b>LLEVAR VUELTO: $${vu.toLocaleString('es-CL')}</b></div>`
+    : `<div class="kk-vuelto sin">💵 Paga justo · sin vuelto</div>`;
+}
 function kioscoFila(r){
   const hora = new Date(r.fecha).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
   const elegido = r.metodo==='efectivo' ? '💵 quiere pagar en efectivo' : '🏦 va a transferir';
@@ -1848,7 +1859,7 @@ function kioscoFila(r){
     acc = `<button class="b" onclick="kioscoReimprimir('${r.id}')">🖨️</button><button onclick="kioscoEntregar('${r.id}',false)">↩ Deshacer</button>`;
   } else { tag=`<span class="kk-tag" style="background:#ddd;">Anulado</span>`; }
   return `<div class="kk-row ${cls}"><div class="kk-cod">${escapeHtml(r.id)}</div>
-    <div class="kk-det">${tag}${r.nombre ? '<b>'+escapeHtml(r.nombre)+'</b> · ' : ''}${r.whatsapp ? '📱 +'+escapeHtml(r.whatsapp)+' · ' : ''}<small>${hora}${r.estado==='pendiente' ? ' · '+elegido : ''}</small><br>${escapeHtml(r.resumen)}</div>
+    <div class="kk-det">${tag}${r.nombre ? '<b>'+escapeHtml(r.nombre)+'</b> · ' : ''}${r.whatsapp ? '📱 +'+escapeHtml(r.whatsapp)+' · ' : ''}<small>${hora}${r.estado==='pendiente' ? ' · '+elegido : ''}</small><br>${escapeHtml(r.resumen)}${r.estado==='pendiente' ? kioscoVuelto(r) : ''}</div>
     <div class="kk-monto">$${Number(r.total).toLocaleString('es-CL')}</div><div class="kk-acc">${acc}</div></div>`;
 }
 /* ---- aviso por WhatsApp (abre WhatsApp con el mensaje listo; solo se aprieta Enviar) ---- */
@@ -1871,26 +1882,28 @@ function kioscoAvisar(id){
   try{ const a = kioscoAvisados(); a[id]=1; localStorage.setItem('kkAvisados', JSON.stringify(a)); }catch(e){}
   kioscoRender();
 }
-function kioscoImprimir(v, id, nombre){
+function kioscoImprimir(v, id, nombre, pagaCon){
   v.comprador = 'Pedido '+id+(nombre ? ' · '+nombre : '');
   v.montoRecibido = null; v.vuelto = null;
+  // pago en efectivo: el voucher muestra con cuánto pagó y el vuelto
+  if(v.metodoPago==='efectivo' && Number(pagaCon)>=Number(v.montoTotal)){ v.montoRecibido = Number(pagaCon); v.vuelto = Number(pagaCon)-Number(v.montoTotal); }
   imprimirVoucherCompleto(v);
 }
 async function kioscoConfirmar(id, metodo){
   const fila = kioscoRows.find(r=>r.id===id);
-  if(!confirm('¿Confirmas que el pago de '+id+' ($'+Number(fila.total).toLocaleString('es-CL')+') llegó '+(metodo==='efectivo'?'en EFECTIVO':'por TRANSFERENCIA')+'?\n\nSe asignarán los cartones y se imprimirá el voucher.')) return;
+  if(!confirm('¿Confirmas que el pago de '+id+' ($'+Number(fila.total).toLocaleString('es-CL')+') llegó '+(metodo==='efectivo'?'en EFECTIVO':'por TRANSFERENCIA')+'?'+(metodo==='efectivo' && Number(fila.pagaCon)>Number(fila.total) ? '\n\n💵 Paga con $'+Number(fila.pagaCon).toLocaleString('es-CL')+' → VUELTO: $'+(Number(fila.pagaCon)-Number(fila.total)).toLocaleString('es-CL') : '')+'\n\nSe asignarán los cartones y se imprimirá el voucher.')) return;
   try{
     const r = await callBackend('kioscoConfirmar', {password: adminPassword, id, metodo});
     // primero se abre WhatsApp con el aviso (antes de imprimir, para que el navegador no lo bloquee)
     if(kioscoWspUrl(fila)){ fila.estado='pagado'; kioscoAvisar(id); }
-    kioscoImprimir(r.voucher, id, fila.nombre);
+    kioscoImprimir(r.voucher, id, fila.nombre, fila.pagaCon);
     kioscoLoad(); loadPurchases();
   }catch(err){ alert('No se pudo confirmar: '+err.message); kioscoLoad(); }
 }
 function kioscoReimprimir(id){
   const fila = kioscoRows.find(r=>r.id===id);
   if(!fila || !fila.voucher){ alert('Este pedido no tiene voucher guardado.'); return; }
-  try{ kioscoImprimir(JSON.parse(fila.voucher), id, fila.nombre); }catch(e){ alert('No se pudo leer el voucher.'); }
+  try{ kioscoImprimir(JSON.parse(fila.voucher), id, fila.nombre, fila.pagaCon); }catch(e){ alert('No se pudo leer el voucher.'); }
 }
 async function kioscoEntregar(id, entregado){
   try{
