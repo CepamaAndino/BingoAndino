@@ -313,7 +313,7 @@ const precioSet1=()=>modo==='evento'?12000:9000;
 function icono(n){n=String(n||'').toLowerCase();
   if(/jugo/.test(n))return'🧃';if(/caf[eé]|mo[ck]+h?a|cap+uc+h?ino|chocolate|marley/.test(n))return'☕';if(/(^|\s)t[eé](\s|$)/.test(n))return'🍵';
   if(/agua/.test(n))return'💧';if(/sopaip|galleta|snack|papas|cabritas|brownie|queque|torta|dulce|completo|empanada|pizza|buka|mix/.test(n))return'🍪';return'🥤';}
-function categoria(p){ if(/rasp[ae]/i.test(p.nombre)) return 'cartones'; return /caf[eé]|(^|\s)t[eé](\s|$)|chocolate|mo[ck]+h?a|cap+uc+h?ino|marley|leche|sopaip|galleta|snack|papas|cabritas|brownie|queque|torta|dulce|completo|empanada|pizza|buka|mix|vegetal|lipton/i.test(p.nombre)&&!/lipton|lata|jugo|bilz|agua/i.test(p.nombre) ? 'cafeteria':'bebidas'; }
+function categoria(p){ if(/rasp[ae]/i.test(p.nombre)) return 'cartones'; return /caf[eé]|(^|\s)t[eé](\s|$)|chocolate|mo[ck]+h?a|cap+uc+h?ino|marley|leche|sopaip|galleta|snack|papas|cabritas|brownie|queque|torta|dulce|completo|empanada|pizza|buka|mix|vegetal|lipton|dorito|lay'?s|lapotato|ramita|evercrisp|chips|\bman[ií]\b|marco polo/i.test(p.nombre)&&!/lipton|lata|jugo|bilz|agua/i.test(p.nombre) ? 'cafeteria':'bebidas'; }
 
 /* ---------- fotos: si el producto no trae foto en la planilla (col. D), se busca por nombre en img/productos/ ---------- */
 function fotoPorNombre(nombre){
@@ -322,6 +322,12 @@ function fotoPorNombre(nombre){
   // formatos grandes y 600cc (pedido CCU) — van primero para no confundirse con las latas
   const grande=/1[,.][56]|litro|lts/.test(n), chica=/600/.test(n);
   if(/rasp[ae]/.test(n)) return f('raspe-suerte');
+  // snacks
+  if(/lapotato|la potato/.test(n)) return f('lapotato-original');
+  if(/dorito/.test(n)) return f('doritos-queso-xs');
+  if(/lay'?s|\blays\b|corte americano/.test(n)) return f('lays-americano-xs');
+  if(/ramita|evercrisp/.test(n)) return f(/queso|mantec/.test(n)?'ramitas-queso':'ramitas-original');
+  if(/\bmani\b|marco polo/.test(n)) return f('mani-marco-polo');
   if(/citrus/.test(n)) return f('latas-citrus');
   if(/coco ?palm|lata corea/.test(n)) return f('coco-palm-lata');
   // Ice Talk por sabor (bolsa + vaso)
@@ -393,13 +399,14 @@ function renderTabs(){
 function setTab(t){tab=t;renderTabs();renderGrid();}
 function foto(it){ return it.img?`<img src="${esc(it.img)}" alt="" onerror="this.outerHTML='<span>${it.emoji||'🎟️'}</span>'">`:`<span>${it.emoji||'🎟️'}</span>`; }
 /* ---------- secciones por tipo ---------- */
-const GRUPOS=[['cartones','🎟️ Cartones y Raspe de la suerte'],['latas','🥫 Latas'],['grandes','🍾 Bebidas 1,5L · para compartir'],['jugos','🧃 Jugos y aguas'],['cafeteria','☕ Cafetería y snacks'],['otros','🛍️ Otros']];
+const GRUPOS=[['cartones','🎟️ Cartones y Raspe de la suerte'],['latas','🥫 Latas'],['grandes','🍾 Bebidas 1,5L · para compartir'],['jugos','🧃 Jugos y aguas'],['snacks','🍿 Snacks y papas'],['cafeteria','☕ Cafetería'],['otros','🛍️ Otros']];
 function grupo(it){
   if(it.cat==='cartones') return 'cartones';
   const n=String(it.nombre||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   if(/1[,.][56] ?l|litro/.test(n)) return 'grandes';
   if(/lata|lipton|citrus/.test(n)) return 'latas';
   if(/600|cachantun|agua|jugo|bolsa|mas |ice ?talk/.test(n)) return 'jugos';
+  if(/dorito|lay'?s|\blays\b|lapotato|ramita|evercrisp|chips|\bmani\b|marco polo|papas|buka|snack/.test(n)) return 'snacks';
   if(it.cat==='cafeteria'||/vaso|cafe|(^|\s)te(\s|$)|papas|buka|snack/.test(n)) return 'cafeteria';
   return 'otros';
 }
