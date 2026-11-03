@@ -849,6 +849,7 @@ body.modo-estado #dispCounter, body.modo-estado #flowHead, body.modo-estado #flo
 
               <button class="btn btn-primary" id="registrarVentaBtn" disabled onclick="registrarVentaPresencial()" style="margin-top:14px; width:100%;">Selecciona cartones o bebestibles</button>
               <button type="button" class="link-limpiar" onclick="limpiarVenta()">Limpiar venta</button>
+              <button type="button" class="btn btn-ghost" id="cortesiaBtn" onclick="registrarCortesia()" style="margin-top:10px; width:100%; border:1.5px dashed #c2185b; color:#c2185b;">🎁 Set de cortesía · 6 cartones · $0</button>
               <div class="err" id="ventaErr"></div>
             </div>
           </div>
@@ -1596,7 +1597,7 @@ function renderTable(){
   document.getElementById('histList').innerHTML = hist.length ? hist.map(p=>`
     <div class="hist-row${p.estado==='aceptada' && esEntregado(p) ? ' entregada' : ''}">
       <b>${p.id}</b>
-      <span class="t"><b>${escapeHtml(p.comprador||'—')}</b>${p.modo==='presencial' ? '<span class="tag-caja">caja</span>' : ''}${p.modo==='kiosco' ? '<span class="tag-caja">kiosco</span>' : ''}${p.modo==='delegada' ? '<span class="tag-caja tag-dele">delegada</span>' : ''}<small>${escapeHtml(p.modo==='delegada' ? (p.metodoPago||'pago a delegada') : (p.email||'—'))}</small></span>
+      <span class="t"><b>${escapeHtml(p.comprador||'—')}</b>${p.modo==='presencial' ? '<span class="tag-caja">caja</span>' : ''}${/^cortes[ií]a/i.test(p.comprador||'') ? '<span class="tag-caja" style="background:#fde7f0;color:#c2185b;">🎁 cortesía</span>' : ''}${p.modo==='kiosco' ? '<span class="tag-caja">kiosco</span>' : ''}${p.modo==='delegada' ? '<span class="tag-caja tag-dele">delegada</span>' : ''}<small>${escapeHtml(p.modo==='delegada' ? (p.metodoPago||'pago a delegada') : (p.email||'—'))}</small></span>
       <span class="t">${escapeHtml(p.alumno||'—')}<small>${escapeHtml(p.curso||'')}</small></span>
       <span class="t">${rango(p)}<small>${p.sets ? p.sets+' sets' : p.cantidad+' cartones'}</small></span>
       <b>${monto(p)}</b>
@@ -2241,6 +2242,29 @@ async function registrarVentaPresencial(){
   }
 }
 
+/* Set de cortesía: 6 cartones a $0, solo desde el administrador. Queda como venta de caja => cuenta como ENTREGADO. */
+async function registrarCortesia(){
+  const errBox = document.getElementById('ventaErr');
+  errBox.textContent='';
+  const btn = document.getElementById('cortesiaBtn');
+  if(btn.disabled) return;
+  const nombre = document.getElementById('ventaNombre').value.trim();
+  if(!confirm('¿Entregar 1 set de cortesía (6 cartones, $0)'+(nombre?' a '+nombre:'')+'?')) return;
+  btn.disabled = true;
+  try{
+    const r = await callBackend('ventaPresencialCompleta', {
+      password: adminPassword, nombreComprador: 'Cortesía'+(nombre?' · '+nombre:''), metodoPago: 'efectivo',
+      cantidadCartones: 6, montoCartones: 0, bebestiblesItems: []
+    });
+    r.cortesia = true;
+    limpiarVenta();
+    imprimirVoucherCompleto(r);
+    await loadPurchases();
+  }catch(err){
+    errBox.textContent = err.message;
+  }finally{ btn.disabled = false; }
+}
+
 function imprimirVoucherCompleto(r){
   let html = `
     <h2 style="margin:0;">BINGO ANDINO 2026</h2>
@@ -2263,8 +2287,8 @@ function imprimirVoucherCompleto(r){
       <p style="font-size:12px;margin:2px 0;">Bebestibles: $${Number(r.bebestibles.monto).toLocaleString('es-CL')}</p>
     `;
   }
-  html += `<hr><p style="font-size:17px;font-weight:bold;">TOTAL: $${Number(r.montoTotal).toLocaleString('es-CL')}</p>`;
-  if(r.metodoPago){
+  html += `<hr><p style="font-size:17px;font-weight:bold;">${r.cortesia ? '🎁 SET DE CORTESÍA' : 'TOTAL: $'+Number(r.montoTotal).toLocaleString('es-CL')}</p>`;
+  if(r.metodoPago && !r.cortesia){
     html += `<p style="font-size:13px;margin:4px 0;">Pago: <b>${r.metodoPago==='efectivo' ? 'Efectivo' : 'Transferencia'}</b></p>`;
     if(r.metodoPago==='efectivo' && r.montoRecibido!==null){
       html += `
