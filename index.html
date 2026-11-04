@@ -1866,6 +1866,8 @@ function kioscoFila(r){
     <div class="kk-monto">$${Number(r.total).toLocaleString('es-CL')}</div><div class="kk-acc">${acc}</div></div>`;
 }
 /* ---- aviso por WhatsApp (abre WhatsApp con el mensaje listo; solo se aprieta Enviar) ---- */
+// WhatsApp Desktop/Web muestra "�" con los emojis "grandes" (🎉 💛 🎟️ 🙌) que vienen en el link; los de caracter simple (✅ ❤ ⏳) sí se ven bien.
+function waSafe(t){ return String(t).replace(/[\u{10000}-\u{10FFFF}]\uFE0F?/gu,'').replace(/ {2,}/g,' ').replace(/ ([.,!?])/g,'$1'); }
 function kioscoWspUrl(r){
   let n = String(r.whatsapp||'').replace(/\D/g,'');
   if(n.length===8) n='569'+n; else if(n.length===9) n='56'+n;
@@ -1873,12 +1875,12 @@ function kioscoWspUrl(r){
   const nom = String(r.nombre||'').trim().split(' ')[0];
   const aMesa = r.mesa && r.mesa!=='Presencial';
   const vu = (r.metodo==='efectivo' && Number(r.pagaCon)>Number(r.total)) ? Number(r.pagaCon)-Number(r.total) : 0;
-  const msg = '¡Hola'+(nom?' '+nom:'')+'! 🎉 Tu pedido *'+r.id+'* del Bingo Andino ya está *pagado*'
-    + (aMesa ? ' y *va en camino a tu '+r.mesa+'* 🪑' : ' y *listo para retirar* en la caja.') + '\n'
+  const msg = '¡Hola'+(nom?' '+nom:'')+'! ✅ Tu pedido *'+r.id+'* del Bingo Andino ya está *pagado*'
+    + (aMesa ? ' y *va en camino a tu '+r.mesa+'*' : ' y *listo para retirar* en la caja.') + '\n'
     + (r.resumen ? 'Detalle: '+r.resumen+'\n' : '') + 'Total: $'+Number(r.total||0).toLocaleString('es-CL')+'\n'
     + (vu && aMesa ? 'Te llevamos tu vuelto: $'+vu.toLocaleString('es-CL')+'\n' : '') + '\n'
-    + (aMesa ? 'Quédate en tu mesa, ya te lo llevamos. ¡Gracias por apoyar! 💛' : 'Muestra este mensaje o di tu código en la caja. ¡Gracias por apoyar! 💛')+'\nCEPAMA · Colegio Andino Montessori';
-  return 'https://wa.me/'+n+'?text='+encodeURIComponent(msg);
+    + (aMesa ? 'Quédate en tu mesa, ya te lo llevamos. ¡Gracias por apoyar! ❤' : 'Muestra este mensaje o di tu código en la caja. ¡Gracias por apoyar! ❤')+'\nCEPAMA · Colegio Andino Montessori';
+  return 'https://wa.me/'+n+'?text='+encodeURIComponent(waSafe(msg));
 }
 function kioscoAvisados(){ try{ return JSON.parse(localStorage.getItem('kkAvisados')||'{}'); }catch(e){ return {}; } }
 function kioscoAvisar(id){
@@ -2374,10 +2376,10 @@ function imprimirVoucher(p){
 
 function sendWhatsapp(p){
   const rangeTxt = p.desde===p.hasta ? ('BA-'+pad(p.desde)) : ('BA-'+pad(p.desde)+' al BA-'+pad(p.hasta));
-  const msg = encodeURIComponent(
+  const msg = encodeURIComponent(waSafe(
     `Hola ${p.comprador}! Tu compra de BINGO ANDINO 2026 fue APROBADA ✅. `+
     `Tus cartones son: ${rangeTxt}. Se entregan de forma física, preséntate con tu número de reserva (${p.id}) para retirarlos. ¡Gracias por apoyar a ${p.alumno}!`
-  );
+  ));
   window.open(`https://wa.me/56${p.whatsapp}?text=${msg}`, '_blank');
 }
 
@@ -2400,7 +2402,7 @@ function recordatorioPagoMsg(p){
 function sendRecordatorioPago(id){
   const p = purchasesCache.find(x=>x.id===id);
   if(!p || !p.whatsapp) return;
-  window.open(`https://wa.me/56${p.whatsapp}?text=${encodeURIComponent(recordatorioPagoMsg(p))}`, '_blank');
+  window.open(`https://wa.me/56${p.whatsapp}?text=${encodeURIComponent(waSafe(recordatorioPagoMsg(p)))}`, '_blank');
 }
 
 /* ============ ELIMINAR UNA COMPRA ============ */
