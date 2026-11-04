@@ -1866,6 +1866,10 @@ function kioscoFila(r){
     <div class="kk-monto">$${Number(r.total).toLocaleString('es-CL')}</div><div class="kk-acc">${acc}</div></div>`;
 }
 /* ---- aviso por WhatsApp (abre WhatsApp con el mensaje listo; solo se aprieta Enviar) ---- */
+// Link con vista previa (imagen "Pedido listo") que muestra el código y la mesa del pedido
+function kioscoPedidoLink(r){
+  return 'https://cepamaandino.github.io/BingoAndino/pedido.html?c='+encodeURIComponent(r.id||'')+'&m='+encodeURIComponent(r.mesa||'Presencial');
+}
 function kioscoWspUrl(r){
   let n = String(r.whatsapp||'').replace(/\D/g,'');
   if(n.length===8) n='569'+n; else if(n.length===9) n='56'+n;
@@ -1877,7 +1881,8 @@ function kioscoWspUrl(r){
     + (aMesa ? ' y *va en camino a tu '+r.mesa+'* 🪑' : ' y *listo para retirar* en la caja.') + '\n'
     + (r.resumen ? 'Detalle: '+r.resumen+'\n' : '') + 'Total: $'+Number(r.total||0).toLocaleString('es-CL')+'\n'
     + (vu && aMesa ? 'Te llevamos tu vuelto: $'+vu.toLocaleString('es-CL')+'\n' : '') + '\n'
-    + (aMesa ? 'Quédate en tu mesa, ya te lo llevamos. ¡Gracias por apoyar! 💛' : 'Muestra este mensaje o di tu código en la caja. ¡Gracias por apoyar! 💛')+'\nCEPAMA · Colegio Andino Montessori';
+    + (aMesa ? 'Quédate en tu mesa, ya te lo llevamos. ¡Gracias por apoyar! 💛' : 'Muestra este mensaje o di tu código en la caja. ¡Gracias por apoyar! 💛')+'\nCEPAMA · Colegio Andino Montessori'
+    + '\n\n'+kioscoPedidoLink(r);
   return 'https://wa.me/'+n+'?text='+encodeURIComponent(msg);
 }
 function kioscoAvisados(){ try{ return JSON.parse(localStorage.getItem('kkAvisados')||'{}'); }catch(e){ return {}; } }

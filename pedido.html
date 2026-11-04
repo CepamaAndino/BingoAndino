@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>¡Tu pedido está listo! · Bingo Andino 2026</title>
+<meta name="robots" content="noindex">
+<meta property="og:type" content="website">
+<meta property="og:title" content="¡Tu pedido está listo! 🎉">
+<meta property="og:description" content="Bingo Andino 2026 · CEPAMA · Colegio Andino Montessori. Abre el link para ver tu código y tu mesa.">
+<meta property="og:image" content="https://cepamaandino.github.io/BingoAndino/img/pedido-listo.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px;font-family:'Segoe UI',system-ui,Arial,sans-serif;background:radial-gradient(circle at 30% 20%,#1c3f9a 0,#0d2154 60%,#08153a 100%);color:#fff}
+.c{width:100%;max-width:440px;text-align:center}
+.logo{width:100%;border-radius:18px;display:block;margin-bottom:16px}
+.ok{width:78px;height:78px;border-radius:50%;background:#22b455;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 8px rgba(34,180,85,.25)}
+.ok svg{width:44px;height:44px}
+h1{margin:6px 0 14px;font-size:30px;line-height:1.1;font-weight:900}
+h1 span{color:#ffd24a}
+.t{background:#fff;color:#0d2154;border-radius:20px;padding:18px 16px;margin:0 0 14px}
+.t small{display:block;font-size:13px;font-weight:700;color:#5a6a95;text-transform:uppercase;letter-spacing:.6px}
+.t b{display:block;font-size:44px;font-weight:900;line-height:1.1;white-space:nowrap}
+.t + .t b{font-size:34px}
+.msg{font-size:17px;color:#cfe0ff;margin:0 0 14px}
+.foot{font-size:13px;color:#9db3e6}
+</style>
+</head>
+<body>
+<div class="c">
+  <div style="font-size:15px;font-weight:800;letter-spacing:2px;color:#ffd24a;margin-bottom:14px">BINGO ANDINO 2026</div>
+  <div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></div>
+  <h1>¡Tu pedido <span>está listo!</span></h1>
+  <div class="t" id="bCod" hidden><small>Tu código</small><b id="cod"></b></div>
+  <div class="t" id="bMesa" hidden><small>Entrega</small><b id="mesa"></b></div>
+  <p class="msg" id="msg">Gracias por apoyar al Bingo Andino 💛</p>
+  <div class="foot">CEPAMA · Colegio Andino Montessori</div>
+</div>
+<script>
+(function(){
+  var q=new URLSearchParams(location.search);
+  var c=(q.get('c')||'').toUpperCase().replace(/[^A-Z0-9\-]/g,'').slice(0,12);
+  var m=(q.get('m')||'').replace(/[^A-Za-z0-9\- ÁÉÍÓÚáéíóúñÑ]/g,'').slice(0,20);
+  if(c){document.getElementById('cod').textContent=c;document.getElementById('bCod').hidden=false;}
+  if(m){
+    document.getElementById('mesa').textContent=m;document.getElementById('bMesa').hidden=false;
+    document.getElementById('msg').textContent=/^presencial$/i.test(m)?'Muestra este código en la caja para retirar tu pedido.':'Quédate en tu mesa, ya te lo llevamos.';
+  }
+})();
+</script>
+</body>
+</html>
