@@ -345,6 +345,7 @@ function fotoPorNombre(nombre){
   if(/sandia|watermelon/.test(n)) return f('icetalk-sandia');
   // latas individuales 350ml (las de 1,5L se resuelven más abajo)
   if(!grande){
+    if(/coca/.test(n)) return f(/zero|cero/.test(n)?'coca-cola-zero-lata':'coca-cola-original-lata');
     if(/bilz/.test(n)) return f('bilz-zero-lata');
     if(/kem/.test(n)) return f('kem-pina-lata');
     if(/limon soda|limonsoda/.test(n)) return f('limon-soda-zero-lata');
