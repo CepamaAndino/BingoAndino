@@ -1036,7 +1036,7 @@ async function callBackend(action, payload){
   const requestId = Date.now().toString(36)+Math.random().toString(36).slice(2,10);
   const body = JSON.stringify({action, payload: Object.assign({}, payload, {requestId})});
   let ultimoError = null;
-  for(let intento = 0; intento < 3; intento++){
+  for(let intento = 0; intento < 5; intento++){
     try{
       const res = await fetch(BACKEND_URL, {
         method:'POST',
@@ -1057,7 +1057,7 @@ async function callBackend(action, payload){
       const esDeRed = err.message === '__html__' || err instanceof TypeError;
       if(!esDeRed) throw err;           // error real del backend (clave mala, sin cartones, etc.): no reintentar
       ultimoError = err;
-      await new Promise(r=>setTimeout(r, 700*(intento+1)));
+      await new Promise(r=>setTimeout(r, 700*(intento+1)+Math.random()*1200));
     }
   }
   throw new Error('No pudimos conectar con el servidor. Recarga la página (Ctrl+F5) y vuelve a intentar. Si sigue igual, prueba en una ventana de incógnito.');
@@ -1975,7 +1975,7 @@ async function kioscoAnular(id){
   catch(err){ alert('No se pudo anular: '+err.message); }
 }
 // Se actualiza solo cada 10 segundos mientras el panel esté abierto
-setInterval(()=>{ if(adminPassword && !document.hidden && document.getElementById('adminPanel').style.display!=='none'){ kioscoLoad(); loadProductosAdmin(); } }, 10000);
+setInterval(()=>{ if(adminPassword && !document.hidden && document.getElementById('adminPanel').style.display!=='none'){ kioscoLoad(); loadProductosAdmin(); } }, 15000);
 
 /* ============ CAJA: VENTA PRESENCIAL ============ */
 let cajaTab = 'top';

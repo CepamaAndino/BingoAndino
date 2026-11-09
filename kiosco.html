@@ -294,14 +294,14 @@ let ultimoPedido=null, idleT=null, enviando=false;
 async function callBackend(action,payload){
   const requestId=Date.now().toString(36)+Math.random().toString(36).slice(2,10);
   const body=JSON.stringify({action,payload:Object.assign({},payload,{requestId})});
-  for(let i=0;i<3;i++){
+  for(let i=0;i<5;i++){
     try{
       const res=await fetch(BACKEND_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body,credentials:'omit',redirect:'follow',cache:'no-store'});
       const txt=await res.text(); let j; try{j=JSON.parse(txt)}catch(e){throw new Error('__net__')}
       if(!j.ok) throw new Error(j.error||'Error');
       if(j.data==null) throw new Error('__net__');
       return j.data;
-    }catch(e){ if(e.message!=='__net__' && !(e instanceof TypeError)) throw e; await new Promise(r=>setTimeout(r,700*(i+1))); }
+    }catch(e){ if(e.message!=='__net__' && !(e instanceof TypeError)) throw e; await new Promise(r=>setTimeout(r,700*(i+1)+Math.random()*1200)); }
   }
   throw new Error('No hay conexión con el sistema. Avisa en la caja.');
 }
@@ -405,7 +405,7 @@ function renderTabs(){
   $('tabs').innerHTML=t.map(([k,n])=>`<button class="${tab===k?'on':''}" onclick="setTab('${k}')">${n}</button>`).join('');
 }
 function setTab(t){tab=t;renderTabs();renderGrid();}
-function foto(it){ return it.img?`<img src="${esc(it.img)}" alt="" onerror="this.outerHTML='<span>${it.emoji||'🎟️'}</span>'">`:`<span>${it.emoji||'🎟️'}</span>`; }
+function foto(it){ return it.img?`<img src="${esc(it.img)}" alt="" loading="lazy" decoding="async" onerror="this.outerHTML='<span>${it.emoji||'🎟️'}</span>'">`:`<span>${it.emoji||'🎟️'}</span>`; }
 /* ---------- secciones por tipo ---------- */
 const GRUPOS=[['cartones','🎟️ Cartones y Raspe de la suerte'],['latas','🥫 Latas'],['grandes','🍾 Bebidas 1,5L · para compartir'],['jugos','🧃 Jugos y aguas'],['snacks','🍿 Snacks y papas'],['cafeteria','☕ Cafetería'],['otros','🛍️ Otros']];
 function grupo(it){
