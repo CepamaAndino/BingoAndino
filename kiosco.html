@@ -521,13 +521,14 @@ async function crear(metodo,pagaConMonto){
   const wsp=$('wsp').value.replace(/\D/g,'');
   if(wsp.length!==8){ $('err2').innerHTML='<div class="err">Escribe tu WhatsApp (8 números después del +56 9) para avisarte cuando esté listo.</div>'; $('wsp').focus(); return; }
   const mesa=lugarEntrega(); if(!mesa) return;
-  enviando=true; $('err2').innerHTML='<div class="load" style="padding:14px">Generando tu código…</div>';
+  enviando=true; $('err2').innerHTML='<div class="load" style="padding:14px">Generando tu código…<br><small>⏳ Puede demorar unos segundos. Espera un momento y <b>no repitas el pedido</b>.</small></div>';
+  const avisoT=setTimeout(()=>{ if(enviando) $('err2').innerHTML='<div class="load" style="padding:14px">Hay mucha gente pidiendo 🙌<br><b>Sigue esperando, tu pedido está en camino.</b><br><small>No lo vuelvas a enviar, así evitamos pedidos repetidos.</small></div>'; },7000);
   try{
     const payload={mesa,whatsapp:'569'+wsp,nombre:$('nombre').value.trim(),sueltos:qty.sueltos||0,sets:qty.sets||0,metodo,pagaCon:metodo==='efectivo'?(pagaConMonto||0):0,items:productos.filter(p=>qty[p.id]).map(p=>({id:p.id,cantidad:qty[p.id]}))};
     const r=await callBackend('kioscoCrear',payload);
     ultimoPedido=r; mostrarCodigo(r); 
-  }catch(e){ $('err2').innerHTML=`<div class="err">${esc(e.message)}</div>`; if(/stock/i.test(e.message)) cargarCatalogo(true); }
-  finally{ enviando=false; }
+  }catch(e){ const red=/conexi/i.test(e.message); $('err2').innerHTML=`<div class="err">${red?'No pudimos confirmar tu pedido. Espera un momento y revisa si te llegó el WhatsApp antes de repetirlo. Si no llega, avisa en la caja.':esc(e.message)}</div>`; if(/stock/i.test(e.message)) cargarCatalogo(true); }
+  finally{ clearTimeout(avisoT); enviando=false; }
 }
 function mostrarCodigo(r){
   const transf=r.metodo!=='efectivo';
