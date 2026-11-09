@@ -868,8 +868,7 @@ body.modo-estado #dispCounter, body.modo-estado #flowHead, body.modo-estado #flo
             <div class="caja-tabs" id="cajaTabs">
               <button type="button" class="active" data-tab="top" onclick="setCajaTab('top')">⭐ Favoritos</button>
               <button type="button" data-tab="cartones" onclick="setCajaTab('cartones')"><i style="background:#c2185b"></i>Cartones</button>
-              <button type="button" data-tab="latas" onclick="setCajaTab('latas')"><i style="background:#b3141f"></i>Latas</button>
-              <button type="button" data-tab="bebidas" onclick="setCajaTab('bebidas')"><i style="background:#1c3f9a"></i>Bebidas</button>
+              <button type="button" data-tab="bebidas" onclick="setCajaTab('bebidas')"><i style="background:#1c3f9a"></i>Bebestibles</button>
               <button type="button" data-tab="snacks" onclick="setCajaTab('snacks')"><i style="background:#d99a00"></i>Snacks</button>
               <button type="button" data-tab="calientes" onclick="setCajaTab('calientes')"><i style="background:#a35a1a"></i>Calientes</button>
               <button type="button" data-tab="todos" onclick="setCajaTab('todos')">▦ Todo</button>
@@ -2064,7 +2063,8 @@ function catCaja(nombre, tipo){
   if(tipo==='cartones') return 'cartones';
   const n=normTxt(nombre);
   if(/rasp[ae]/.test(n)) return 'cartones';
-  if(/lata|350|lipton|citrus/.test(n) && !/1[,.][56]/.test(n)) return 'latas';
+  // todo lo frío es "bebidas": latas, 1,5L, jugos, aguas, vasos con hielo
+  if(/hielo|jugo|ice ?talk|bolsa|1[,.][56]|lata|350|600|lipton|citrus|agua|cachantun|pepsi|coca|bilz|kem|7 ?up|crush|ginger|limon|\bmas /.test(n)) return 'bebidas';
   if(/dorito|lay'?s|\blays\b|lapotato|ramita|evercrisp|chips|\bmani\b|marco polo|papas|buka|snack/.test(n)) return 'snacks';
   if(/cafe|(^|\s)te(\s|$)|chocolate|mo[ck]+h?a|cap+uc+h?ino|marley|vaso|leche/.test(n)) return 'calientes';
   return 'bebidas';
