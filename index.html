@@ -2064,7 +2064,7 @@ function catCaja(nombre, tipo){
   const n=normTxt(nombre);
   if(/rasp[ae]/.test(n)) return 'cartones';
   // todo lo frío es "bebidas": latas, 1,5L, jugos, aguas, vasos con hielo
-  if(/hielo|jugo|ice ?talk|bolsa|1[,.][56]|lata|350|600|lipton|citrus|agua|cachantun|pepsi|coca|bilz|kem|7 ?up|crush|ginger|limon|\bmas /.test(n)) return 'bebidas';
+  if(/vaso|hielo|jugo|ice ?talk|bolsa|1[,.][56]|lata|350|600|lipton|citrus|agua|cachantun|pepsi|coca|bilz|kem|7 ?up|crush|ginger|limon|\bmas /.test(n)) return 'bebidas';
   if(/dorito|lay'?s|\blays\b|lapotato|ramita|evercrisp|chips|\bmani\b|marco polo|papas|buka|snack/.test(n)) return 'snacks';
   if(/cafe|(^|\s)te(\s|$)|chocolate|mo[ck]+h?a|cap+uc+h?ino|marley|vaso|leche/.test(n)) return 'calientes';
   return 'bebidas';
