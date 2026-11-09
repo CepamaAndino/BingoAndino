@@ -314,6 +314,44 @@
   .quick-row button:disabled{ opacity:.35; cursor:not-allowed; }
   #registrarVentaBtn.cobrar{ font-weight:900; background:#1fa855; color:#fff; border-color:#168a45; font-size:22px; padding:20px 10px; letter-spacing:.3px; }
   #registrarVentaBtn.cobrar:disabled{ background:#e9d6a3; color:#7a6a4f; font-size:15px; padding:16px 10px; }
+
+  /* ---- Caja compacta: buscador, fotos, colores, +/- ---- */
+  .caja-search{ display:flex; align-items:center; gap:8px; border:2px solid var(--tinta); border-radius:14px; background:#fff; padding:0 12px; height:46px; margin-bottom:10px; }
+  .caja-search input{ border:none !important; outline:none; box-shadow:none !important; flex:1; font-size:17px; font-weight:700; background:transparent; padding:0 !important; margin:0 !important; height:100%; min-width:0; }
+  .caja-search .lupa{ font-size:18px; }
+  .caja-search .xq{ border:none; background:#eef1f8; border-radius:50%; width:26px; height:26px; font-size:15px; cursor:pointer; display:none; }
+  .caja-tabs{ grid-template-columns:repeat(auto-fit,minmax(86px,1fr)); gap:6px; margin-bottom:10px; }
+  .caja-tabs button{ padding:8px 4px; font-size:13px; border-radius:10px; border-color:#e2d3b0; }
+  .caja-tabs button.active{ background:var(--tinta); border-color:var(--tinta); }
+  .caja-tabs button i{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:5px; vertical-align:middle; }
+  .caja-grid{ grid-template-columns:repeat(auto-fill,minmax(104px,1fr)); gap:9px; }
+  .caja-item{ min-height:0; padding:7px 6px 8px; border-width:2px; border-top:6px solid var(--cc,#e2d3b0); border-radius:12px; gap:1px; justify-content:flex-start; }
+  .caja-item.has{ border-color:var(--cc,var(--ok)); border-top-color:var(--cc,var(--ok)); background:#fff; box-shadow:0 0 0 3px color-mix(in srgb,var(--cc,#3f7d4f) 28%,transparent); }
+  .caja-item .ph{ height:52px; width:100%; display:flex; align-items:center; justify-content:center; margin-bottom:2px; }
+  .caja-item .ph img{ max-height:52px; max-width:90%; object-fit:contain; }
+  .caja-item .ph .ic{ font-size:32px; }
+  .caja-item .nm{ font-size:12px; min-height:28px; display:flex; align-items:center; justify-content:center; }
+  .caja-item .pr{ font-size:16px; }
+  .caja-item .stk{ position:absolute; top:4px; right:5px; font-size:10px; background:#e5f6ea; border-radius:7px; padding:1px 5px; }
+  .caja-item .stk.low{ background:#fde2e1; color:#b3141f; }
+  .caja-item .fav{ position:absolute; top:2px; left:3px; border:none; background:none; font-size:16px; line-height:1; cursor:pointer; color:#c9b98f; padding:2px; }
+  .caja-item .fav.on{ color:#e0a400; }
+  .caja-item .qb{ display:flex; align-items:center; justify-content:space-between; width:100%; margin-top:5px; background:var(--cc,#3f7d4f); color:#fff; border-radius:9px; height:30px; font-weight:900; font-size:16px; }
+  .caja-item .qb span{ width:34px; height:30px; display:flex; align-items:center; justify-content:center; font-size:20px; cursor:pointer; }
+  .caja-item .bdg,.caja-item .menos{ display:none; }
+  .res-line{ align-items:center; }
+  .res-line .rl-n{ flex:1; min-width:0; font-size:13px; }
+  .res-line .pm{ display:flex; align-items:center; gap:4px; font-weight:900; }
+  .res-line .pm button{ width:26px; height:26px; border-radius:8px; border:none; background:#eef1f8; font-weight:900; font-size:16px; cursor:pointer; }
+  .res-line b{ min-width:58px; text-align:right; font-size:13px; }
+  .quick-row{ grid-template-columns:repeat(4,1fr); }
+  .quick-row button.exacto{ grid-column:1/-1; background:var(--tinta); color:#fff; border-color:var(--tinta); font-size:16px; padding:13px 2px; }
+  .quick-row button.exacto.on{ background:#1fa855; border-color:#168a45; }
+  .quick-row button.exacto:disabled{ background:#ddd; color:#888; border-color:#ddd; }
+  .caja-bar{ display:none; position:fixed; left:0; right:0; bottom:0; z-index:50; background:var(--tinta); color:#fff; padding:10px 14px; align-items:center; justify-content:space-between; gap:10px; box-shadow:0 -3px 12px rgba(0,0,0,.25); }
+  .caja-bar b{ font-size:22px; }
+  .caja-bar button{ background:#1fa855; color:#fff; border:none; border-radius:12px; font-weight:900; font-size:16px; padding:12px 18px; }
+  @media (max-width:860px){ .caja-bar.show{ display:flex; } }
   .caja-resumen{ position:sticky; top:10px; }
   @media (max-width:860px){ .caja-resumen{ position:static; } }
   .res-line{ display:flex; justify-content:space-between; gap:8px; padding:7px 0; border-bottom:1px solid #f0e6cc; font-size:14px; }
@@ -826,15 +864,19 @@ body.modo-estado #dispCounter, body.modo-estado #flowHead, body.modo-estado #flo
         </div>
         <div class="caja-wrap">
           <div>
+            <div class="caja-search"><span class="lupa">🔍</span><input type="search" id="cajaBuscar" placeholder="Buscar: coca, zero, agua…" autocomplete="off" oninput="cajaBuscar(this.value)" onkeydown="if(event.key==='Enter'){cajaEnter();}"><button type="button" class="xq" id="cajaBuscarX" onclick="cajaBuscar('');document.getElementById('cajaBuscar').focus()">✕</button></div>
             <div class="caja-tabs" id="cajaTabs">
-              <button type="button" class="active" data-tab="top" onclick="setCajaTab('top')">⭐ Más vendidos</button>
-              <button type="button" data-tab="cartones" onclick="setCajaTab('cartones')">🎟️ Cartones</button>
-              <button type="button" data-tab="bebestibles" onclick="setCajaTab('bebestibles')">🥤 Bebestibles</button>
+              <button type="button" class="active" data-tab="top" onclick="setCajaTab('top')">⭐ Favoritos</button>
+              <button type="button" data-tab="cartones" onclick="setCajaTab('cartones')"><i style="background:#c2185b"></i>Cartones</button>
+              <button type="button" data-tab="latas" onclick="setCajaTab('latas')"><i style="background:#b3141f"></i>Latas</button>
+              <button type="button" data-tab="bebidas" onclick="setCajaTab('bebidas')"><i style="background:#1c3f9a"></i>Bebidas</button>
+              <button type="button" data-tab="snacks" onclick="setCajaTab('snacks')"><i style="background:#d99a00"></i>Snacks</button>
+              <button type="button" data-tab="calientes" onclick="setCajaTab('calientes')"><i style="background:#a35a1a"></i>Calientes</button>
               <button type="button" data-tab="todos" onclick="setCajaTab('todos')">▦ Todo</button>
             </div>
             <div class="caja-grid" id="cajaGrid"></div>
           </div>
-          <div class="caja-resumen">
+          <div class="caja-resumen" id="cajaResumenBox">
             <div style="border:1.5px solid #e2d3b0; border-radius:14px; padding:14px; background:#fff;">
               <h3 style="margin:0 0 6px; font-size:17px;">🛒 Resumen de venta</h3>
               <div id="cajaResumen"></div>
@@ -861,6 +903,8 @@ body.modo-estado #dispCounter, body.modo-estado #flowHead, body.modo-estado #flo
           </div>
         </div>
       </div>
+
+      <div class="caja-bar" id="cajaBar"><span>Total <b id="cajaBarTotal">$0</b></span><button type="button" onclick="document.getElementById('cajaResumenBox').scrollIntoView({behavior:'smooth',block:'start'})">Ir a cobrar ▸</button></div>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
@@ -1953,17 +1997,123 @@ function iconoProducto(n){
 }
 // stock: vacío = ilimitado; número = unidades disponibles
 function stockDe(p){ return (p.stock===''||p.stock===null||p.stock===undefined) ? null : Math.max(0, Number(p.stock)||0); }
+function fotoPorNombre(nombre){
+  const n=String(nombre||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const f=x=>'img/productos/'+x+'.webp';
+  // formatos grandes y 600cc (pedido CCU) — van primero para no confundirse con las latas
+  const grande=/1[,.][56]|litro|lts/.test(n), chica=/600/.test(n);
+  if(/rasp[ae]/.test(n)) return f('raspe-suerte');
+  // snacks
+  if(/lapotato|la potato/.test(n)) return f('lapotato-original');
+  if(/dorito/.test(n)) return f('doritos-queso-xs');
+  if(/lay'?s|\blays\b|corte americano/.test(n)) return f('lays-americano-xs');
+  if(/ramita|evercrisp/.test(n)) return f(/queso|mantec/.test(n)?'ramitas-queso':'ramitas-original');
+  if(/\bmani\b|marco polo/.test(n)) return f('mani-marco-polo');
+  if(/citrus/.test(n)) return f('latas-citrus');
+  if(/coco ?palm|lata corea/.test(n)) return f('coco-palm-lata');
+  // Ice Talk por sabor (bolsa + vaso)
+  if(/granada|pomegranate/.test(n)) return f('icetalk-granada');
+  if(/limonada azul|blue ?lemon/.test(n)) return f('icetalk-limonada-azul');
+  if(/arandano|blueberry/.test(n)) return f('icetalk-arandano');
+  if(/uva verde|green grape/.test(n)) return f('icetalk-uva-verde');
+  if(/sandia|watermelon/.test(n)) return f('icetalk-sandia');
+  // latas individuales 350ml (las de 1,5L se resuelven más abajo)
+  if(!grande){
+    if(/coca/.test(n)) return f(/zero|cero/.test(n)?'coca-cola-zero-lata':'coca-cola-original-lata');
+    if(/bilz/.test(n)) return f('bilz-zero-lata');
+    if(/kem/.test(n)) return f('kem-pina-lata');
+    if(/limon soda|limonsoda/.test(n)) return f('limon-soda-zero-lata');
+    if(/ginger|canada dry/.test(n)) return f('ginger-ale-zero-lata');
+    if(/pepsi/.test(n)&&/zero|cero/.test(n)) return f('pepsi-zero-lata');
+    if(/pepsi/.test(n)&&/lata|350/.test(n)) return f('pepsi-lata');
+  }
+  if(/bolsa|ice ?talk|jugo corean/.test(n)) return f('jugo-bolsa-corea-v2');
+  if(/kem/.test(n)) return f('kem-xtreme-15');
+  if(/7 ?up/.test(n)) return f('7up-15');
+  if(/ginger|canada dry/.test(n)) return f('ginger-ale-zero-15');
+  if(/pepsi/.test(n)&&grande) return f(/zero|cero/.test(n)?'pepsi-zero-15':'pepsi-15');
+  if(/crush/.test(n)&&grande) return f('crush-15');
+  if(/manzana/.test(n)) return f('mas-manzana-16');
+  if(/pera/.test(n)) return f('mas-pera-16');
+  if(/pina/.test(n)) return f('mas-pina-600');
+  if(/mango|maracuya/.test(n)) return f('mas-mango-600');
+  if(/frutos|bosque/.test(n)) return f('mas-frutos-bosque-600');
+  if(/cachantun|agua/.test(n)&&chica) return f(/s\/ ?gas|sin gas|natural/.test(n)?'cachantun-singas-600':'cachantun-gas-600');
+  if(/lipton|ice ?tea/.test(n)) return f(/durazno/.test(n)?'lipton-durazno':'lipton-limon');
+  if(/vaso/.test(n)) return f(/hielo/.test(n)?'vaso-hielo':'vaso');
+  if(/latas? (de )?bebidas?|bebidas? (en )?latas?/.test(n)) return f('latas-bebidas');
+  if(/corea|bong|uva/.test(n)) return f('jugo-corea');
+  if(/pepsi/.test(n)) return f(/botella|1[,.]5|litro|lts/.test(n)?'pepsi-botella':(/zero|cero/.test(n)?'pepsi-zero':'pepsi'));
+  if(/limon|canada/.test(n)) return f('limon-soda');
+  if(/crush|naranja/.test(n)) return f('crush');
+  if(/cachantun|agua/.test(n)) return f(/sin gas|natural/.test(n)?'cachantun-singas':(/gas/.test(n)?'cachantun-gas':'cachantun-singas'));
+  if(/buka|mix|vegetal/.test(n)) return f('mix-buka');
+  // cafetería caliente
+  if(/mo[ck]+h?a/.test(n)) return f('mocaccino');
+  if(/cap+uc+h?ino/.test(n)) return f('capuccino');
+  if(/chocolate/.test(n)) return f('chocolate-caliente');
+  if(/marley|marlen|instantaneo|liofilizado|sobre/.test(n)) return f('cafe-marley');
+  if(/maquina|endulzado/.test(n)) return f('cafe-maquina');
+  if(/(^|\s)cafe/.test(n)) return f('cafe');
+  if(/(^|\s)te(\s|$)/.test(n)) return f('te');
+  return '';
+}
+
+function normTxt(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+function catCaja(nombre, tipo){
+  if(tipo==='cartones') return 'cartones';
+  const n=normTxt(nombre);
+  if(/rasp[ae]/.test(n)) return 'cartones';
+  if(/lata|350|lipton|citrus/.test(n) && !/1[,.][56]/.test(n)) return 'latas';
+  if(/dorito|lay'?s|\blays\b|lapotato|ramita|evercrisp|chips|\bmani\b|marco polo|papas|buka|snack/.test(n)) return 'snacks';
+  if(/cafe|(^|\s)te(\s|$)|chocolate|mo[ck]+h?a|cap+uc+h?ino|marley|vaso|leche/.test(n)) return 'calientes';
+  return 'bebidas';
+}
+const COLOR_CAJA = { cartones:'#c2185b', latas:'#b3141f', bebidas:'#1c3f9a', snacks:'#d99a00', calientes:'#a35a1a' };
+let cajaQ = '';
+function cajaFavs(){ try{ const v = JSON.parse(localStorage.getItem('cajaFavs')||'null'); return Array.isArray(v) ? v : null; }catch(e){ return null; } }
+function cajaToggleFav(k){
+  let f = cajaFavs();
+  if(!f) f = topKeys(cajaItems());
+  f = f.indexOf(k)>=0 ? f.filter(x=>x!==k) : f.concat([k]);
+  try{ localStorage.setItem('cajaFavs', JSON.stringify(f)); }catch(e){}
+  renderCaja();
+}
 function cajaItems(){
   const items = [
-    { k:'u', tipo:'cartones', nombre:'Cartón individual', icon:'🎟️', precio:precioUnitarioCarton(), sub:'', qty:unidadesSueltas },
-    { k:'s', tipo:'cartones', nombre:'Set de 6 cartones', icon:'🎫', precio:(currentModo==='evento'?12000:9000),
-      sub: setsCount===2 ? 'Pack familia: 2 sets $12.000' : '6 cartones', qty:setsCount }
+    { k:'s', tipo:'cartones', nombre:'Set de 6 cartones', img:'img/set.png', icon:'🎫', precio:(currentModo==='evento'?12000:9000),
+      sub: setsCount===2 ? 'Pack familia' : '', qty:setsCount },
+    { k:'u', tipo:'cartones', nombre:'Cartón individual', img:'img/carton.png', icon:'🎟️', precio:precioUnitarioCarton(), sub:'', qty:unidadesSueltas }
   ];
-  productosCache.forEach(p=> items.push({ k:p.id, tipo:'bebestibles', nombre:p.nombre, icon:iconoProducto(p.nombre),
+  productosCache.forEach(p=> items.push({ k:p.id, tipo:'bebestibles', nombre:p.nombre, img:(p.foto||fotoPorNombre(p.nombre)), icon:iconoProducto(p.nombre),
     precio:Number(p.precio), sub:'', qty:ventaBebestiblesQty[p.id]||0, stock:stockDe(p) }));
+  items.forEach(i=> i.cat = catCaja(i.nombre, i.tipo));
   return items;
 }
 function setCajaTab(t){ cajaTab = t; renderCaja(); }
+function cajaBuscar(v){
+  cajaQ = normTxt(v).trim();
+  const inp = document.getElementById('cajaBuscar'); if(inp && inp.value!==v) inp.value = v;
+  renderCaja();
+}
+function cajaVisibles(){
+  const todos = cajaItems();
+  if(cajaQ){
+    const ws = cajaQ.split(/\s+/);
+    return todos.filter(i=>{ const n = normTxt(i.nombre+' '+(i.tipo==='cartones'?'carton cartones':'')); return ws.every(w=>n.indexOf(w)>=0); });
+  }
+  if(cajaTab==='top'){
+    const favs = cajaFavs() || topKeys(todos);
+    const items = todos.filter(i=> favs.indexOf(i.k)>=0);
+    todos.forEach(i=>{ if(i.qty>0 && items.indexOf(i)===-1) items.push(i); });
+    return items;
+  }
+  return todos.filter(i=> cajaTab==='todos' || i.cat===cajaTab);
+}
+function cajaEnter(){
+  const v = cajaVisibles().filter(i=> i.stock!==0);
+  if(v.length>=1){ cajaCambiar(v[0].k,1); cajaBuscar(''); }
+}
 // ranking de más vendidos, según las ventas presenciales ya registradas
 function topKeys(items){
   const cuenta = {};
@@ -1985,27 +2135,26 @@ function topKeys(items){
     .sort((a,b)=> b.n-a.n || a.ix-b.ix).slice(0,8).map(x=>x.k);
 }
 function renderCaja(){
-  document.querySelectorAll('#cajaTabs button').forEach(b=> b.classList.toggle('active', b.dataset.tab===cajaTab));
-  const todos = cajaItems();
-  let items;
-  if(cajaTab==='top'){
-    const top = topKeys(todos);
-    items = top.map(k=> todos.find(i=>i.k===k));                      // en orden de más vendido
-    todos.forEach(i=>{ if(i.qty>0 && top.indexOf(i.k)===-1) items.push(i); });  // lo ya elegido siempre se ve
-  }
-  else items = todos.filter(i=> cajaTab==='todos' || i.tipo===cajaTab);
+  document.querySelectorAll('#cajaTabs button').forEach(b=> b.classList.toggle('active', !cajaQ && b.dataset.tab===cajaTab));
+  const xb = document.getElementById('cajaBuscarX'); if(xb) xb.style.display = cajaQ ? 'block' : 'none';
+  const items = cajaVisibles();
+  const favs = cajaFavs() || topKeys(cajaItems());
   const grid = document.getElementById('cajaGrid');
-  if(!items.length){ grid.innerHTML = '<p class="note">No hay productos en el catálogo todavía.</p>'; }
-  else grid.innerHTML = items.map(i=>`
-    <div class="caja-item ${i.qty>0?'has':''} ${i.stock===0?'agotado':''}" role="button" tabindex="0" onclick="cajaCambiar('${i.k}',1)">
-      ${i.qty>0 ? `<div class="bdg">${i.qty}</div><button type="button" class="menos" title="Quitar uno" onclick="event.stopPropagation();cajaCambiar('${i.k}',-1)">−</button>` : ''}
-      <div class="ic">${i.icon}</div>
+  if(!items.length){ grid.innerHTML = '<p class="note">'+(cajaQ?'Nada coincide con esa búsqueda.':(cajaTab==='top'?'Aún no tienes favoritos: en “Todo” toca la ☆ de los productos que quieras ver primero.':'No hay productos en esta categoría.'))+'</p>'; }
+  else grid.innerHTML = items.map(i=>{
+    const stOk = i.stock!==null && i.stock!==undefined;
+    const rest = stOk ? i.stock - i.qty : null;
+    return `
+    <div class="caja-item ${i.qty>0?'has':''} ${i.stock===0?'agotado':''}" style="--cc:${COLOR_CAJA[i.cat]}" role="button" tabindex="0" onclick="cajaCambiar('${i.k}',1)">
+      <button type="button" class="fav ${favs.indexOf(i.k)>=0?'on':''}" title="Favorito (aparece primero)" onclick="event.stopPropagation();cajaToggleFav('${i.k}')">${favs.indexOf(i.k)>=0?'★':'☆'}</button>
+      ${stOk && i.stock>0 ? `<span class="stk ${rest<=5?'low':''}">${rest}</span>` : ''}
+      <div class="ph">${i.img ? `<img src="${i.img}" alt="" loading="lazy" onerror="this.outerHTML='<span class=&quot;ic&quot;>${i.icon}</span>'">` : `<span class="ic">${i.icon}</span>`}</div>
       <div class="nm">${escapeHtml(i.nombre)}</div>
       <div class="pr">$${i.precio.toLocaleString('es-CL')}</div>
       ${i.sub ? `<div class="sb">${escapeHtml(i.sub)}</div>` : ''}
-      ${i.stock===0 ? '<div class="sin">SIN STOCK</div>' : (i.stock!==null && i.stock!==undefined ? `<div class="stk">Stock: ${i.stock - i.qty}</div>` : '')}
-    </div>`).join('')
-    + (cajaTab==='top' ? `<div class="caja-item mas" role="button" tabindex="0" onclick="setCajaTab('todos')"><div class="ic">＋</div><div class="nm">Ver todos</div></div>` : '');
+      ${i.stock===0 ? '<div class="sin">SIN STOCK</div>' : ''}
+      ${i.qty>0 ? `<div class="qb" onclick="event.stopPropagation()"><span onclick="cajaCambiar('${i.k}',-1)">−</span><b>${i.qty}</b><span onclick="cajaCambiar('${i.k}',1)">+</span></div>` : ''}
+    </div>`; }).join('');
   calcularTotalVenta();
 }
 // nombres antiguos (los usan otras partes de la página)
@@ -2066,7 +2215,7 @@ function renderQuickMontos(total){
   const billetes = [5000,10000,15000,20000];
   const quick = document.getElementById('quickMonto');
   const habilitado = total > 0;
-  const btns = [`<button type="button" class="btn btn-ghost ${montoRecibido===total&&total>0?'on':''}" ${habilitado?'':'disabled'} onclick="setMontoRecibido('exacto')">Exacto</button>`]
+  const btns = [`<button type="button" class="btn btn-ghost exacto ${montoRecibido===total&&total>0?'on':''}" ${habilitado?'':'disabled'} onclick="setMontoRecibido('exacto')">✔ Pago exacto${total>0?' · $'+total.toLocaleString('es-CL'):''}</button>`]
     .concat(billetes.map(v=>`<button type="button" class="btn btn-ghost ${montoRecibido===v?'on':''}" ${(habilitado && v>=total)?'':'disabled'} onclick="setMontoRecibido(${v})">$${v.toLocaleString('es-CL')}</button>`));
   quick.innerHTML = btns.join('');
 }
@@ -2078,16 +2227,16 @@ function calcularTotalVenta(){
   const montoCartonesTotal = montoUnidades + montoSets;
   let totalBeb = 0;
   const lineas = [];
-  if(unidadesSueltas>0) lineas.push({ q:unidadesSueltas, n:'Cartón individual', m:montoUnidades });
-  if(setsCount>0) lineas.push({ q:setsCount, n: setsCount===2 ? 'Sets de 6 cartones (pack familia)' : 'Set de 6 cartones', m:montoSets });
+  if(unidadesSueltas>0) lineas.push({ k:'u', q:unidadesSueltas, n:'Cartón individual', m:montoUnidades });
+  if(setsCount>0) lineas.push({ k:'s', q:setsCount, n: setsCount===2 ? 'Sets de 6 cartones (pack familia)' : 'Set de 6 cartones', m:montoSets });
   productosCache.forEach(p=>{
     const q = ventaBebestiblesQty[p.id]||0;
-    if(q>0){ const m = q*Number(p.precio); totalBeb += m; lineas.push({ q, n:p.nombre, m }); }
+    if(q>0){ const m = q*Number(p.precio); totalBeb += m; lineas.push({ k:p.id, q, n:p.nombre, m }); }
   });
   const total = montoCartonesTotal + totalBeb;
 
   document.getElementById('cajaResumen').innerHTML = lineas.length
-    ? lineas.map(l=>`<div class="res-line"><span>${l.q} × ${escapeHtml(l.n)}</span><b>$${l.m.toLocaleString('es-CL')}</b></div>`).join('')
+    ? lineas.map(l=>`<div class="res-line"><span class="rl-n">${escapeHtml(l.n)}</span><span class="pm"><button type="button" onclick="cajaCambiar('${l.k}',-1)">−</button>${l.q}<button type="button" onclick="cajaCambiar('${l.k}',1)">+</button></span><b>$${l.m.toLocaleString('es-CL')}</b></div>`).join('')
     : '<div class="res-empty">Toca los productos para armar la venta.</div>';
   document.getElementById('ventaTotalCombo').textContent = '$'+total.toLocaleString('es-CL');
 
@@ -2099,6 +2248,8 @@ function calcularTotalVenta(){
   btn.textContent = !haySeleccion ? 'Toca los productos para armar la venta'
     : faltaPlata ? 'Falta plata para completar' : 'COBRAR · $'+total.toLocaleString('es-CL');
 
+  const bar = document.getElementById('cajaBar');
+  if(bar){ bar.classList.toggle('show', total>0); document.getElementById('cajaBarTotal').textContent = '$'+total.toLocaleString('es-CL'); }
   renderQuickMontos(total);
   actualizarVuelto(total);
   return { montoCartonesTotal, totalBeb, total };
