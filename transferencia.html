@@ -36,8 +36,8 @@ textarea{display:block;width:100%;min-height:190px;margin-top:8px;padding:12px;b
   <div class="t">🏦 Transferencia</div>
   <div class="s">Copia los datos y abre tu banco para agregar un nuevo destinatario</div>
   <div class="box" id="box"></div>
-  <button class="all" id="all2">📋 Copiar datos para transferir</button>
-  <label for="textoTransferencia">Datos que se copiarán, uno por línea:</label>
+  <button class="all" id="all2">📋 Copiar destinatario para el banco</button>
+  <label for="textoTransferencia">Solo datos del destinatario, uno por línea:</label>
   <textarea id="textoTransferencia" readonly spellcheck="false" wrap="off"></textarea>
   <div class="n2">En tu banco elige <b>Nuevo destinatario</b>. Si ofrece pegar o importar los datos, acepta y revísalos. Si no los reconoce, copia cada dato con los botones de arriba.</div>
   <div class="ok" id="ok"></div>
@@ -60,7 +60,7 @@ async function cp(t,msg){
   document.getElementById('ok').textContent=ok?msg:'No se pudo copiar. Mantén presionado el texto para copiarlo manualmente.';
   return ok;
 }
-const TODO=D.map(d=>(d[0]==='Email'?'Correo':d[0])+': '+d[1]).join('\n');
+const TODO=D.map(d=>d[2]).join('\n');
 document.getElementById('textoTransferencia').value=TODO;
 document.getElementById('all2').onclick=()=>cp(TODO,'✅ Todos los datos copiados (con saltos de línea)');
 document.getElementById('box').innerHTML=D.map((d,i)=>`<button class="r" data-i="${i}"><div><i>${i+1}. ${d[0]}</i><b>${d[1]}</b></div><span>📋</span></button>`).join('');
