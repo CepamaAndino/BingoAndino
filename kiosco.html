@@ -253,10 +253,10 @@ aside small{display:block;text-align:center;color:var(--mute);font-size:17px;mar
         <div class="tabla" id="datos"></div>
         <div class="fin-qr" id="qrbox"><img src="img/qr-transferencia.png" alt="QR datos de transferencia"><p>Escanea desde tu celular</p></div>
       </div>
-      <button class="fin-copy" onclick="copiarTodo()">📋 Copiar datos para transferir</button>
-      <label class="fin-hint" for="textoTransferencia">Datos que se copiarán, uno por línea:</label>
+      <button class="fin-copy" onclick="copiarTodo()">📋 Copiar destinatario para el banco</button>
+      <label class="fin-hint" for="textoTransferencia">Solo datos del destinatario, uno por línea:</label>
       <textarea class="transfer-text" id="textoTransferencia" readonly spellcheck="false" wrap="off"></textarea>
-      <p class="fin-hint">Después de copiar, abre tu banco y elige <b>Nuevo destinatario</b>. Si ofrece pegar o importar los datos, acepta y revísalos. Si no los reconoce, usa los botones individuales de arriba. Ingresa el monto y el mensaje si tu banco no los completa.</p>
+      <p class="fin-hint">Después de copiar, abre tu banco y elige <b>Nuevo destinatario</b>. Si ofrece pegar o importar los datos, acepta y revísalos. Si no los reconoce, usa los botones individuales de arriba. El monto y el mensaje se ingresan por separado: toca el total y tu código de compra para copiarlos.</p>
     </div>
     <div class="fin-card fin-efe hidden" id="blkEfe">
       <div class="fin-h"><h4>Pago en efectivo</h4><span class="pend">🕒 Pendiente de pago</span></div>
@@ -564,10 +564,8 @@ function mostrarCodigo(r){
   $('pasos').innerHTML=P.map((x,i)=>`<div><span>${i+1}</span><p><b>${esc(x[0])}</b>${esc(x[1])}</p></div>`).join('');
   ver(3);
 }
-function textoTransferencia(r){
-  const lineas=DATOS.map(d=>(d[0]==='Email'?'Correo':d[0])+': '+d[1]);
-  if(r&&r.codigo) lineas.push('Monto: '+clp(r.total),'Mensaje: '+r.codigo+' Bingo Andino');
-  return lineas.join('\n');
+function textoTransferencia(){
+  return DATOS.map(d=>d[2]).join('\n');
 }
 function copiarTodo(){return copiar(textoTransferencia(ultimoPedido),'✅ Datos copiados con saltos de línea');}
 function nueva(){ destino='';$('mesaNum').value='';$('nombre').value=''; $('wsp').value='';qty={};ultimoPedido=null;ver(1);render();cargarCatalogo(true); }
