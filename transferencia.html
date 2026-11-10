@@ -26,6 +26,7 @@ header img{height:56px;border-radius:10px;background:#fff}
 .n2{color:#cfd6ea;text-align:center;font-size:13px;margin-top:8px;line-height:1.4}
 .ok{text-align:center;color:#9ff0b0;margin-top:12px;min-height:24px;font-weight:700}
 .n{color:#fff;text-align:center;font-size:15px;margin-top:10px;line-height:1.5}
+textarea{display:block;width:100%;min-height:190px;margin-top:8px;padding:12px;border:2px solid #ffc83d;border-radius:12px;font:15px/1.5 "Segoe UI",sans-serif;background:#fff8e6;color:#10224f;white-space:pre;overflow:auto}label{display:block;color:#cfd8ff;font-size:14px;margin-top:14px}
 </style></head><body>
 <header>
   <div><h1>BINGO <b>ANDINO</b></h1><p>Datos para transferir</p></div>
@@ -33,18 +34,35 @@ header img{height:56px;border-radius:10px;background:#fff}
 </header>
 <div class="c">
   <div class="t">🏦 Transferencia</div>
-  <div class="s">Toca <b>un dato a la vez</b> y pégalo en el campo que corresponde de tu banco</div>
+  <div class="s">Copia los datos y abre tu banco para agregar un nuevo destinatario</div>
   <div class="box" id="box"></div>
-  <button class="all2" id="all2">📋 Copiar todo junto (para enviar por WhatsApp)</button>
-  <div class="n2">Para pagar en tu banco, copia <b>de a uno</b>. “Copiar todo junto” sirve para mandarlo por WhatsApp o guardarlo, no para pegarlo en un solo campo del banco.</div>
+  <button class="all" id="all2">📋 Copiar datos para transferir</button>
+  <label for="textoTransferencia">Datos que se copiarán, uno por línea:</label>
+  <textarea id="textoTransferencia" readonly spellcheck="false" wrap="off"></textarea>
+  <div class="n2">En tu banco elige <b>Nuevo destinatario</b>. Si ofrece pegar o importar los datos, acepta y revísalos. Si no los reconoce, copia cada dato con los botones de arriba.</div>
   <div class="ok" id="ok"></div>
   <div class="n">En el mensaje de la transferencia pon tu <b>código de compra</b> (por ejemplo K-0007) o el nombre del alumno/a y su curso.</div>
 </div>
 <script>
 const D=[['Nombre','Patricia Bravo Alcaino','Patricia Bravo Alcaino'],['RUT','16.859.492-5','16859492-5'],['Banco','Banco Estado','Banco Estado'],['Tipo de cuenta','Cuenta Corriente','Cuenta Corriente'],['N° de cuenta','33000074697','33000074697'],['Email','cepama@colegioandino.cl','cepama@colegioandino.cl']];
-async function cp(t,msg){try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()}document.getElementById('ok').textContent=msg}
-const TODO=D.map(d=>d[0]+': '+d[1]).join('\n');
+async function copiarTextoSeguro(t){
+  try{ await navigator.clipboard.writeText(t); return true; }catch(e){}
+  const a=document.createElement('textarea');
+  a.value=t; a.readOnly=true; a.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:0';
+  const foco=document.activeElement; document.body.appendChild(a);
+  let ok=false;
+  try{a.focus();a.select();a.setSelectionRange(0,a.value.length);ok=document.execCommand('copy');}catch(e){}
+  finally{a.remove();if(foco&&foco.focus)foco.focus();}
+  return ok;
+}
+async function cp(t,msg){
+  const ok=await copiarTextoSeguro(t);
+  document.getElementById('ok').textContent=ok?msg:'No se pudo copiar. Mantén presionado el texto para copiarlo manualmente.';
+  return ok;
+}
+const TODO=D.map(d=>(d[0]==='Email'?'Correo':d[0])+': '+d[1]).join('\n');
+document.getElementById('textoTransferencia').value=TODO;
 document.getElementById('all2').onclick=()=>cp(TODO,'✅ Todos los datos copiados (con saltos de línea)');
 document.getElementById('box').innerHTML=D.map((d,i)=>`<button class="r" data-i="${i}"><div><i>${i+1}. ${d[0]}</i><b>${d[1]}</b></div><span>📋</span></button>`).join('');
-document.querySelectorAll('.r').forEach(b=>b.onclick=()=>{const d=D[b.dataset.i];cp(d[2],'✅ '+d[0]+' copiado: '+d[2]);b.style.outline='2px solid #2e9b4f';b.querySelector('span').textContent='✅'});
+document.querySelectorAll('.r').forEach(b=>b.onclick=async()=>{const d=D[b.dataset.i];if(!await cp(d[2],'✅ '+d[0]+' copiado: '+d[2]))return;b.style.outline='2px solid #2e9b4f';b.querySelector('span').textContent='✅'});
 </script></body></html>
