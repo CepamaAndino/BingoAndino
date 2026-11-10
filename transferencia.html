@@ -31,17 +31,14 @@ header img{height:56px;border-radius:10px;background:#fff}
 </header>
 <div class="c">
   <div class="t">🏦 Transferencia</div>
-  <div class="s">Toca un dato para copiarlo, o copia todo de una vez</div>
+  <div class="s">Toca <b>un dato a la vez</b> y pégalo en el campo que corresponde de tu banco</div>
   <div class="box" id="box"></div>
-  <button class="all" id="all">📋 Copiar todos los datos</button>
   <div class="ok" id="ok"></div>
   <div class="n">En el mensaje de la transferencia pon tu <b>código de compra</b> (por ejemplo K-0007) o el nombre del alumno/a y su curso.</div>
 </div>
 <script>
-const D=[['Nombre','Patricia Bravo Alcaino'],['RUT','16.859.492-5'],['Banco','Banco Estado'],['Tipo de cuenta','Cuenta Corriente'],['N° de cuenta','33000074697'],['Email','cepama@colegioandino.cl']];
-const T='PATRICIA BRAVO ALCAINO\nRUT: 16.859.492-5\nBanco Estado\nCuenta Corriente\nN° Cuenta: 33000074697\nEmail: cepama@colegioandino.cl';
+const D=[['Nombre','Patricia Bravo Alcaino','Patricia Bravo Alcaino'],['RUT','16.859.492-5','16859492-5'],['Banco','Banco Estado','Banco Estado'],['Tipo de cuenta','Cuenta Corriente','Cuenta Corriente'],['N° de cuenta','33000074697','33000074697'],['Email','cepama@colegioandino.cl','cepama@colegioandino.cl']];
 async function cp(t,msg){try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()}document.getElementById('ok').textContent=msg}
-document.getElementById('box').innerHTML=D.map((d,i)=>`<button class="r" data-i="${i}"><div><i>${d[0]}</i><b>${d[1]}</b></div><span>📋</span></button>`).join('');
-document.querySelectorAll('.r').forEach(b=>b.onclick=()=>{const d=D[b.dataset.i];cp(d[1],'✅ Copiado: '+d[1])});
-document.getElementById('all').onclick=()=>cp(T,'✅ Todos los datos copiados');
+document.getElementById('box').innerHTML=D.map((d,i)=>`<button class="r" data-i="${i}"><div><i>${i+1}. ${d[0]}</i><b>${d[1]}</b></div><span>📋</span></button>`).join('');
+document.querySelectorAll('.r').forEach(b=>b.onclick=()=>{const d=D[b.dataset.i];cp(d[2],'✅ '+d[0]+' copiado: '+d[2]);b.style.outline='2px solid #2e9b4f';b.querySelector('span').textContent='✅'});
 </script></body></html>
